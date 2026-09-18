@@ -1,0 +1,1730 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Latam5S — Organiza tus envíos con calma</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    
+    <!-- Chart.js para Gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- SheetJS (Para leer Excel y CSV) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+        body { font-family: "Quicksand", system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+        [hidden] { display: none !important; }
+        select:disabled { background-color: #f3f4f6; cursor: not-allowed; opacity: 0.7; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Autocompletado */
+        .autocomplete-results {
+            position: absolute; width: 100%; border: 1px solid #e5e7eb; border-top: none;
+            max-height: 240px; overflow-y: auto; z-index: 50; background-color: #ffffff;
+            border-radius: 0 0 0.75rem 0.75rem; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); transition: all 0.2s ease;
+        }
+        .dark .autocomplete-results { background-color: #1f2937; border-color: #374151; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); }
+        .autocomplete-item { padding: 0.875rem 1.25rem; cursor: pointer; font-size: 0.875rem; border-bottom: 1px solid #f3f4f6; }
+        .dark .autocomplete-item { border-bottom: 1px solid #374151; }
+        .autocomplete-item:hover, .autocomplete-item.selected { background-color: #f8fafc; }
+        .dark .autocomplete-item:hover, .dark .autocomplete-item.selected { background-color: #374151; }
+        .autocomplete-item strong { color: #0891B2; font-weight: 700; }
+
+        /* Animaciones para Toasts y Modales */
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+        .toast-enter { animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .toast-exit { animation: fadeOut 0.3s ease forwards; }
+
+        @media (min-width: 768px) {
+            ::-webkit-scrollbar { width: 6px; height: 6px; }
+            ::-webkit-scrollbar-track { background: transparent; }
+            ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+            ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+            .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        }
+    </style>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class', 
+            theme: {
+                extend: {
+                    colors: {
+                        'accent': '#3B82F6', 'accent-alt': '#10B981', 'brand-bg': '#F8FAFC',     
+                        'brand-text': '#0f172a', 'brand-muted': '#64748b', 'brand-accent': '#0891B2', 
+                    },
+                    boxShadow: { 'subtle': '0 4px 20px -2px rgba(0, 0, 0, 0.03)', }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brand-bg text-brand-text dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300 min-h-screen flex flex-col">
+
+    <!-- Contenedor Toasts -->
+    <div id="toast-container" class="fixed top-4 right-4 sm:top-6 sm:right-6 z-[9999] flex flex-col gap-3 w-72 max-w-[90vw]"></div>
+
+    <!-- Login -->
+    <div id="auth-container" class="fixed inset-0 bg-brand-bg dark:bg-gray-900 z-[100] flex items-center justify-center p-4 backdrop-blur-sm bg-opacity-90 dark:bg-opacity-90 transition-all">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 p-6 sm:p-10 w-full max-w-md">
+            <div class="mb-8 text-center">
+                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-accent to-accent-alt mb-4 shadow-lg">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                </div>
+                <h2 class="text-2xl font-bold dark:text-white">Latam5S</h2>
+                <p class="mt-2 text-xs text-brand-muted dark:text-gray-400">Arquitectura NoSQL (Producción)</p>
+            </div>
+            
+            <form id="login-form" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-semibold mb-2">PIN de Acceso</label>
+                    <input type="password" id="login-password" required class="block w-full px-4 py-3 text-center tracking-widest font-mono bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-brand-accent/20 focus:border-brand-accent dark:bg-gray-900 dark:border-gray-700 dark:text-white" placeholder="••••••••">
+                    <p class="text-xs text-center text-gray-400 mt-2">Usa 123456 por defecto. Migrar validación al backend para prod real.</p>
+                </div>
+                <button type="submit" id="login-submit-btn" class="w-full py-3.5 font-bold rounded-2xl text-white bg-gradient-to-r from-accent to-accent-alt hover:opacity-90 shadow-md transition-all flex justify-center items-center">
+                    <span>Ingresar</span> <i data-feather="arrow-right" class="ml-2 w-4 h-4"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- APP Principal -->
+    <div id="main-app" class="flex-grow p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full hidden flex-col">
+
+        <!-- Header -->
+        <header class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Complicidad Boutique</h1>
+                <div class="flex items-center mt-1 space-x-2 text-xs text-brand-muted">
+                    <span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute h-full w-full rounded-full bg-green-400 opacity-75"></span><span class="relative rounded-full h-2.5 w-2.5 bg-green-500"></span></span>
+                    <span class="font-medium text-green-600">Sistema Activo</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-2 md:pb-0 w-full md:w-auto">
+                <button id="btn-sync-now" class="px-3 py-2 text-sm font-medium bg-white dark:bg-gray-800 border rounded-xl hover:text-brand-accent flex items-center shadow-sm transition-all dark:border-gray-700 whitespace-nowrap">
+                    <i data-feather="refresh-cw" class="w-4 h-4 mr-2"></i> <span>Sincronizar</span>
+                </button>
+                <button id="darkModeToggle" class="p-2 bg-white dark:bg-gray-800 border rounded-xl hover:text-brand-accent shadow-sm dark:border-gray-700"><i data-feather="moon" class="w-5 h-5 dark:hidden"></i><i data-feather="sun" class="w-5 h-5 hidden dark:block"></i></button>
+                <button id="logoutButton" class="p-2 bg-white dark:bg-gray-800 border rounded-xl hover:text-red-500 shadow-sm dark:border-gray-700"><i data-feather="log-out" class="w-5 h-5"></i></button>
+            </div>
+        </header>
+
+        <!-- Tabs -->
+        <div class="mb-6">
+            <nav class="flex p-1 space-x-1 bg-gray-200/50 dark:bg-gray-800 rounded-2xl w-full overflow-x-auto scrollbar-hide" id="tabs">
+                <button data-tab="products" class="tab-btn flex-1 min-w-[80px] py-3 px-2 text-xs sm:text-sm font-semibold rounded-xl text-brand-muted hover:text-brand-text transition-all"><i data-feather="box" class="w-4 h-4 inline mx-auto sm:mr-1"></i><span class="hidden sm:inline">Productos</span></button>
+                <button data-tab="sales" class="tab-btn flex-1 min-w-[80px] py-3 px-2 text-xs sm:text-sm font-semibold rounded-xl bg-white dark:bg-gray-700 text-brand-accent shadow transition-all"><i data-feather="shopping-bag" class="w-4 h-4 inline mx-auto sm:mr-1"></i><span class="hidden sm:inline">Ventas</span></button>
+                <button data-tab="shipping" class="tab-btn flex-1 min-w-[80px] py-3 px-2 text-xs sm:text-sm font-semibold rounded-xl text-brand-muted hover:text-brand-text transition-all"><i data-feather="truck" class="w-4 h-4 inline mx-auto sm:mr-1"></i><span class="hidden sm:inline">Logística</span></button>
+                <button data-tab="expenses" class="tab-btn flex-1 min-w-[80px] py-3 px-2 text-xs sm:text-sm font-semibold rounded-xl text-brand-muted hover:text-brand-text transition-all"><i data-feather="dollar-sign" class="w-4 h-4 inline mx-auto sm:mr-1"></i><span class="hidden sm:inline">Gastos</span></button>
+                <button data-tab="reports" class="tab-btn flex-1 min-w-[80px] py-3 px-2 text-xs sm:text-sm font-semibold rounded-xl text-brand-muted hover:text-brand-text transition-all"><i data-feather="pie-chart" class="w-4 h-4 inline mx-auto sm:mr-1"></i><span class="hidden sm:inline">Reportes</span></button>
+                <button data-tab="config" class="tab-btn flex-1 min-w-[80px] py-3 px-2 text-xs sm:text-sm font-semibold rounded-xl text-brand-muted hover:text-brand-text transition-all"><i data-feather="settings" class="w-4 h-4 inline mx-auto sm:mr-1"></i><span class="hidden sm:inline">Ajustes</span></button>
+            </nav>
+        </div>
+
+        <div id="sales-panel" class="tab-panel">
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+                <!-- Formulario Nueva Venta -->
+                <div class="xl:col-span-4 bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-subtle border dark:border-gray-700 h-fit">
+                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><i data-feather="plus-circle" class="text-accent"></i> Nueva Venta</h2>
+                    <form id="add-sale-form" class="space-y-5">
+                        <div class="space-y-1.5 relative">
+                            <label class="block text-sm font-semibold">Cliente (Teléfono)</label>
+                            <input type="text" id="client-search" placeholder="Ej: 987654321" class="w-full px-4 py-3 bg-gray-50 border rounded-xl text-sm focus:ring-2 focus:ring-brand-accent/20 dark:bg-gray-900 dark:border-gray-700" autocomplete="off">
+                            <input type="hidden" id="sale-client-id">
+                            <div id="client-search-results" class="autocomplete-results hidden"></div>
+                        </div>    
+                        
+                        <!-- Carrito -->
+                        <div class="bg-gray-50/80 dark:bg-gray-900/50 rounded-2xl p-5 border dark:border-gray-700 space-y-4">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-sm font-bold">Carrito de Compras</h3>
+                                <span class="px-2 py-1 bg-white rounded-md text-xs font-bold text-brand-accent border dark:bg-gray-800 dark:border-gray-600" id="item-count-badge">0 items</span>
+                            </div>
+                            
+                            <div class="space-y-3 relative">
+                                <input type="text" id="sale-product-search" placeholder="Buscar producto..." class="w-full px-4 py-2.5 bg-white border rounded-xl text-sm dark:bg-gray-800 dark:border-gray-600" autocomplete="off">
+                                <input type="hidden" id="sale-product-id">
+                                <div id="sale-product-search-results" class="autocomplete-results hidden"></div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <input type="number" id="sale-item-qty" placeholder="Cant." min="1" value="1" class="w-full px-4 py-2.5 bg-white border rounded-xl text-sm dark:bg-gray-800 dark:border-gray-600">
+                                    <input type="number" id="sale-item-price" placeholder="S/ Total Lote" min="0" step="0.01" class="w-full px-4 py-2.5 bg-white border rounded-xl text-sm dark:bg-gray-800 dark:border-gray-600">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <input type="text" id="sale-item-color" placeholder="Color (Opc.)" class="w-full px-4 py-2.5 bg-white border rounded-xl text-sm dark:bg-gray-800 dark:border-gray-600">
+                                    <input type="text" id="sale-item-talla" placeholder="Talla (Opc.)" class="w-full px-4 py-2.5 bg-white border rounded-xl text-sm dark:bg-gray-800 dark:border-gray-600">
+                                </div>
+                                <button type="button" id="add-sale-item-btn" class="w-full py-2.5 bg-white border rounded-xl font-bold hover:bg-gray-50 flex justify-center items-center dark:bg-gray-700 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors">
+                                    <i data-feather="plus" class="w-4 h-4 mr-1"></i> Añadir Prenda
+                                </button>
+                            </div>
+                            
+                            <ul id="current-sale-items" class="text-sm space-y-2 empty:hidden mt-4 pt-3 border-t dark:border-gray-700"></ul>
+                            <div class="flex justify-between items-end pt-3 border-t dark:border-gray-700">
+                                <span class="text-sm font-semibold text-gray-500">Total Venta</span>
+                                <div class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-accent to-accent-alt">S/ <span id="current-sale-total">0.00</span></div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold mb-1.5">Fecha</label>
+                                <input type="date" id="sale-date" required class="w-full px-4 py-3 bg-gray-50 border rounded-xl text-sm dark:bg-gray-900 dark:border-gray-700">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold mb-1.5">Medio</label>
+                                <select id="sale-payment-method" required class="w-full px-4 py-3 bg-gray-50 border rounded-xl text-sm dark:bg-gray-900 dark:border-gray-700 cursor-pointer">
+                                    <option value="" disabled selected>Elegir...</option>
+                                    <option value="Link">🔗 Pago Link</option>
+                                    <option value="Yape">📱 Yape</option>
+                                    <option value="Plin">📱 Plin</option>
+                                    <option value="Tarjeta">💳 Tarjeta</option>
+                                    <option value="Transferencia">🏦 Transf.</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full py-3.5 font-bold rounded-xl text-white bg-gradient-to-r from-accent to-accent-alt hover:shadow-lg transition-all flex justify-center items-center">
+                            <i data-feather="check-circle" class="w-5 h-5 mr-2"></i> Finalizar Venta
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Historial Ventas Consolidadas -->
+                <div class="xl:col-span-8 space-y-6 flex flex-col">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-subtle border dark:border-gray-700">
+                        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                            <div class="relative"><input type="text" id="client-sales-filter-search" placeholder="Buscar Cliente..." class="w-full px-4 py-2.5 bg-gray-50 border rounded-xl text-sm dark:bg-gray-900 dark:border-gray-700"></div>
+                            <div class="relative"><input type="text" id="product-sales-filter-search" placeholder="Buscar Producto..." class="w-full px-4 py-2.5 bg-gray-50 border rounded-xl text-sm dark:bg-gray-900 dark:border-gray-700"></div>
+                            <div class="relative"><input type="date" id="date-sales-filter" class="w-full px-4 py-2.5 bg-gray-50 border rounded-xl text-sm dark:bg-gray-900 dark:border-gray-700 cursor-pointer"></div>
+                            <div class="flex items-center gap-4 justify-end lg:justify-center">
+                                <label class="flex items-center cursor-pointer text-sm font-semibold"><input type="checkbox" id="pending-sales-filter-toggle" checked class="mr-2 w-4 h-4 rounded text-brand-accent focus:ring-brand-accent"> Pendientes</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 overflow-hidden flex flex-col flex-grow">
+                        <div class="overflow-x-auto flex-grow">
+                            <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
+                                <thead class="bg-gray-50 dark:bg-gray-800/80 text-xs font-bold text-gray-500 uppercase tracking-wider text-left">
+                                    <tr>
+                                        <th class="px-4 py-4">Fecha/Cliente</th>
+                                        <th class="px-4 py-4">Producto</th>
+                                        <th class="px-4 py-4 text-right">Total</th>
+                                        <th class="px-4 py-4 text-center">Estado</th>
+                                        <th class="px-4 py-4"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sales-list" class="bg-white dark:bg-gray-800 divide-y divide-gray-50 dark:divide-gray-700/50"></tbody>
+                            </table>
+                        </div>
+                        <div id="sales-pagination" class="bg-gray-50 dark:bg-gray-800/80 p-3 border-t dark:border-gray-700 flex justify-between items-center text-sm"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="products-panel" class="tab-panel" hidden>
+             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-grow">
+                <div class="lg:col-span-1 bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-subtle border dark:border-gray-700 h-fit">
+                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><i data-feather="package" class="text-emerald-500"></i> Inventario</h2>
+                    <form id="add-product-form" class="space-y-4">
+                        <div class="relative">
+                            <label class="block text-sm font-semibold mb-1">Prenda</label>
+                            <input type="text" id="product-search-inventory" placeholder="Ej: Polo Box" class="w-full px-4 py-3 bg-gray-50 border rounded-xl text-sm dark:bg-gray-900 dark:border-gray-700" autocomplete="off">
+                            <div id="product-search-inventory-results" class="autocomplete-results hidden"></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-sm font-semibold mb-1">+ Stock</label><input type="number" id="product-stock" min="1" value="1" class="w-full px-4 py-3 border rounded-xl text-sm dark:bg-gray-900 dark:border-gray-700"></div>
+                            <div><label class="block text-sm font-semibold mb-1">Costo Lote</label><input type="number" id="product-cost" required min="0" step="0.01" class="w-full px-4 py-3 border rounded-xl text-sm dark:bg-gray-900 dark:border-gray-700"></div>
+                        </div>
+                        <div><label class="block text-sm font-semibold mb-1">Fecha de Compra</label><input type="date" id="product-purchase-date" required class="w-full px-4 py-3 border rounded-xl text-sm dark:bg-gray-900 dark:border-gray-700"></div>
+                        <button type="submit" class="w-full py-3.5 font-bold rounded-xl text-white bg-gradient-to-r from-accent to-accent-alt shadow-md transition-all hover:shadow-lg">Guardar Ingreso</button>
+                    </form>
+                </div>
+                
+                <div class="lg:col-span-3 bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 overflow-hidden flex flex-col">
+                    <div class="p-6 border-b dark:border-gray-700 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <h2 class="text-xl font-bold">Directorio (JSON)</h2>
+                        <div class="relative w-full sm:w-64">
+                            <input type="text" id="product-directory-search" placeholder="Filtrar prendas..." class="w-full px-4 py-2 border rounded-xl text-sm dark:bg-gray-900 dark:border-gray-700">
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto flex-grow">
+                        <table class="min-w-full divide-y dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-800 text-xs font-bold text-gray-500 uppercase">
+                                <tr><th class="px-6 py-4 text-left">Producto</th><th class="px-6 py-4 text-center">Stock</th><th class="px-6 py-4 text-right">Costo Promedio</th><th class="px-6 py-4 text-center">Acciones</th></tr>
+                            </thead>
+                            <tbody id="products-list" class="divide-y dark:divide-gray-700/50"></tbody>
+                        </table>
+                    </div>
+                    <div id="products-pagination" class="bg-gray-50 dark:bg-gray-800/80 p-3 border-t dark:border-gray-700 flex justify-between items-center text-sm"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="shipping-panel" class="tab-panel" hidden>
+            <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 overflow-hidden flex flex-col h-full">
+                
+                <div class="p-6 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <h2 class="text-xl font-bold flex items-center gap-2"><i data-feather="map-pin" class="text-accent"></i> Rutas y Envíos</h2>
+                    
+                    <div class="flex gap-2 w-full md:w-auto items-center flex-wrap">
+                        <span class="text-sm font-semibold text-gray-500">Filtrar Fecha:</span>
+                        <input type="date" id="shipping-date-filter" class="flex-1 sm:flex-none px-4 py-2 border rounded-xl text-sm dark:bg-gray-900 dark:border-gray-700 cursor-pointer">
+                        <span class="text-gray-300 dark:text-gray-600 hidden sm:inline">|</span>
+                        
+                        <label for="shipping-excel-upload" class="cursor-pointer px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-400 text-white rounded-xl font-bold shadow-md transition-all hover:shadow-lg flex items-center gap-2 text-sm whitespace-nowrap">
+                            <i data-feather="file-text" class="w-4 h-4"></i> Cargar Excel
+                        </label>
+                        <input type="file" id="shipping-excel-upload" accept=".csv, .xlsx, .xls" class="hidden">
+                        
+                        <button id="clear-excel-btn" class="hidden text-red-500 hover:text-red-700 p-2 transition-colors" title="Limpiar Excel">
+                            <i data-feather="x-circle" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="mass-shipping-bar" class="bg-blue-50/50 dark:bg-blue-900/10 p-5 border-b dark:border-gray-700 flex flex-col md:flex-row justify-between md:items-center gap-4 hidden">
+                    <h3 class="text-sm font-bold flex items-center gap-2"><i data-feather="truck" class="text-accent"></i> Despachar Seleccionados</h3>
+                    <div class="flex items-center gap-2">
+                        <input type="date" id="mass-shipping-date" class="px-3 py-2 border rounded-xl text-sm dark:bg-gray-800 dark:border-gray-600">
+                        <button id="mass-update-shipping-btn" class="px-4 py-2 bg-green-500 text-white font-bold rounded-xl text-sm hover:bg-green-600 shadow-sm transition-colors">Despachar Múltiples</button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto p-6 flex-grow">
+                    <table class="min-w-full divide-y dark:divide-gray-700 ring-1 ring-gray-100 dark:ring-gray-700 rounded-2xl">
+                        <thead class="bg-gray-50 dark:bg-gray-800/80 text-xs font-bold text-gray-500 uppercase text-left">
+                            <tr>
+                                <th class="px-4 py-4 text-center"><input type="checkbox" id="select-all-shipping-checkbox" class="rounded w-4 h-4 cursor-pointer"></th>
+                                <th class="px-6 py-4">Courier</th>
+                                <th class="px-6 py-4">Cliente / Celular</th>
+                                <th class="px-6 py-4">Detalle JSON Consolidado</th>
+                                <th class="px-6 py-4 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="all-shipments-list" class="divide-y dark:divide-gray-700/50">
+                            <tr><td colspan="5" class="px-6 py-12 text-center text-gray-400">Seleccione fecha arriba o cargue un Excel para buscar automáticamente.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="logistics-pagination" class="bg-gray-50 dark:bg-gray-800/80 p-3 border-t dark:border-gray-700 flex justify-between items-center text-sm"></div>
+            </div>
+        </div>
+
+        <div id="expenses-panel" class="tab-panel" hidden>
+             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <div class="lg:col-span-1 bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-subtle border dark:border-gray-700 h-fit">
+                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><i data-feather="dollar-sign" class="text-red-500"></i> Registrar Gasto</h2>
+                    <form id="add-expense-form" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">Concepto</label>
+                            <input type="text" id="expense-desc" placeholder="Ej: Alquiler Local" required class="w-full px-4 py-3 bg-gray-50 border rounded-xl text-sm dark:bg-gray-900 dark:border-gray-700" autocomplete="off">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">Monto (S/)</label>
+                            <input type="number" id="expense-amount" required min="0" step="0.01" class="w-full px-4 py-3 border rounded-xl text-sm dark:bg-gray-900 dark:border-gray-700">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">Fecha</label>
+                            <input type="date" id="expense-date" required class="w-full px-4 py-3 border rounded-xl text-sm dark:bg-gray-900 dark:border-gray-700">
+                        </div>
+                        <button type="submit" class="w-full py-3.5 font-bold rounded-xl text-white bg-gradient-to-r from-red-500 to-orange-400 shadow-md transition-all hover:shadow-lg">Guardar Gasto</button>
+                    </form>
+                </div>
+                
+                <div class="lg:col-span-3 bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 overflow-hidden flex flex-col">
+                    <div class="p-6 border-b dark:border-gray-700 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <h2 class="text-xl font-bold">Historial de Gastos Operativos</h2>
+                    </div>
+                    <div class="overflow-x-auto flex-grow">
+                        <table class="min-w-full divide-y dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-800 text-xs font-bold text-gray-500 uppercase text-left">
+                                <tr><th class="px-6 py-4">Fecha</th><th class="px-6 py-4">Concepto</th><th class="px-6 py-4 text-right">Monto</th><th class="px-6 py-4 text-center">Acciones</th></tr>
+                            </thead>
+                            <tbody id="expenses-list" class="divide-y dark:divide-gray-700/50"></tbody>
+                        </table>
+                    </div>
+                    <div id="expenses-pagination" class="bg-gray-50 dark:bg-gray-800/80 p-3 border-t dark:border-gray-700 flex justify-between items-center text-sm"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="reports-panel" class="tab-panel" hidden>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 p-6">
+                    <h3 class="text-lg font-bold mb-4">Ventas Mensuales</h3>
+                    <div class="h-64"><canvas id="salesChart"></canvas></div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 p-6">
+                    <h3 class="text-lg font-bold mb-4">Compras Mensuales (Egresos)</h3>
+                    <div class="h-64"><canvas id="purchasesChart"></canvas></div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 p-6 flex flex-col h-full">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold flex items-center gap-2"><i data-feather="pie-chart" class="text-accent-alt"></i> Cierre Diario</h2>
+                        <div class="flex gap-2 items-center">
+                            <span class="text-sm text-gray-500 font-semibold hidden sm:inline">Fecha:</span>
+                            <input type="date" id="report-date-filter" class="px-3 py-2 border rounded-xl text-sm cursor-pointer dark:bg-gray-900 dark:border-gray-700">
+                        </div>
+                    </div>
+                    <table class="min-w-full">
+                        <thead class="text-xs text-gray-500 text-left border-b dark:border-gray-700"><tr><th class="pb-2">Medio</th><th class="pb-2 text-center">Cant.</th><th class="pb-2 text-right">Total</th></tr></thead>
+                        <tbody id="report-results-tbody" class="text-sm"></tbody>
+                        <tfoot class="font-bold border-t dark:border-gray-700"><tr id="report-results-total-row" hidden><td class="pt-4">TOTAL VENTAS</td><td id="report-total-transactions" class="pt-4 text-center"></td><td id="report-grand-total" class="pt-4 text-right text-accent"></td></tr></tfoot>
+                    </table>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 p-6 h-[400px] flex flex-col">
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><i data-feather="award" class="text-yellow-500"></i> Top Clientes</h2>
+                    <ul id="top-clients-list" class="overflow-y-auto flex-grow space-y-2 scrollbar-hide"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="config-panel" class="tab-panel" hidden>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                 <!-- Configuración de Conexión -->
+                 <div class="lg:col-span-1 space-y-6">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-subtle border dark:border-gray-700">
+                        <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><i data-feather="link" class="text-accent"></i> Conexión a Base de Datos</h2>
+                        <form id="config-form" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">URL de Google Apps Script</label>
+                                <input type="url" id="config-gas-url" required placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-4 py-3 bg-gray-50 border rounded-xl text-sm dark:bg-gray-900 dark:border-gray-700">
+                                <p class="text-xs text-gray-500 mt-2">Pega aquí el enlace de tu despliegue web. Este se guardará de forma segura en tu navegador (localStorage).</p>
+                            </div>
+                            <button type="submit" class="w-full py-3.5 font-bold rounded-xl text-white bg-gradient-to-r from-gray-700 to-gray-900 shadow-md transition-all hover:shadow-lg dark:from-gray-600 dark:to-gray-800">Guardar URL</button>
+                        </form>
+                    </div>
+                 </div>
+                 
+                 <!-- Código Apps Script Base -->
+                 <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-subtle border dark:border-gray-700 flex flex-col h-[70vh]">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold flex items-center gap-2"><i data-feather="code" class="text-emerald-500"></i> Código Backend (Apps Script)</h2>
+                        <button onclick="copyGasCode()" class="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg font-semibold flex items-center gap-2 transition-colors"><i data-feather="copy" class="w-4 h-4"></i> Copiar Todo</button>
+                    </div>
+                    <p class="text-sm text-gray-500 mb-4">Crea un nuevo proyecto en <a href="https://script.google.com" target="_blank" class="text-brand-accent underline">script.google.com</a>, pega este código en `Código.gs`, guarda e impleméntalo como Aplicación Web.</p>
+                    <textarea id="gas-code-block" readonly class="w-full flex-grow p-4 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-xl font-mono text-xs sm:text-sm text-gray-800 dark:text-gray-300 resize-none focus:outline-none"></textarea>
+                 </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Loader (z-[1000] para bloquear todo) -->
+    <div id="modal" class="fixed inset-0 z-[1000] bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4" hidden>
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-2xl max-w-sm w-full text-center border border-gray-100 dark:border-gray-700">
+            <i data-feather="loader" class="w-8 h-8 mx-auto mb-4 animate-spin text-accent"></i>
+            <h3 id="modal-title" class="text-xl font-bold mb-2 text-brand-text dark:text-white">Cargando...</h3>
+            <p id="modal-message" class="text-sm text-gray-500 dark:text-gray-400">Por favor, espere.</p>
+        </div>
+    </div>
+
+    <!-- Modal Confirmación -->
+    <div id="confirm-modal" class="fixed inset-0 z-[500] bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity" hidden>
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 sm:p-8 shadow-2xl max-w-sm w-full text-center border border-gray-100 dark:border-gray-700 transform transition-all">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-50 dark:bg-red-900/30 mb-4 text-red-500">
+                <i data-feather="alert-triangle" class="w-6 h-6"></i>
+            </div>
+            <h3 id="confirm-title" class="text-xl font-bold text-gray-900 dark:text-white mb-2">¿Estás seguro?</h3>
+            <p id="confirm-message" class="text-sm text-gray-500 dark:text-gray-400 mb-6">Esta acción no se puede deshacer.</p>
+            <div class="flex gap-3">
+                <button id="confirm-cancel-btn" class="flex-1 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-white font-bold rounded-xl transition-colors">Cancelar</button>
+                <button id="confirm-ok-btn" class="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl shadow-md transition-colors">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Historial de Producto -->
+    <div id="history-modal" class="fixed inset-0 z-[400] bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity" hidden>
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 sm:p-8 shadow-2xl max-w-md w-full border border-gray-100 dark:border-gray-700 flex flex-col max-h-[80vh]">
+            <div class="flex justify-between items-center mb-5">
+                <div class="flex items-center gap-2">
+                    <i data-feather="clock" class="text-brand-accent"></i>
+                    <h3 id="history-title" class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Historial</h3>
+                </div>
+                <button onclick="document.getElementById('history-modal').setAttribute('hidden', true)" class="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors bg-gray-50 dark:bg-gray-700 p-1.5 rounded-lg"><i data-feather="x"></i></button>
+            </div>
+            <div class="overflow-y-auto flex-grow scrollbar-hide">
+                <ul id="history-list" class="space-y-3"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // ESTADO Y CONFIGURACIÓN
+        // ==========================================
+        let GAS_WEB_APP_URL = localStorage.getItem('latam5s_gas_url') || ""; 
+        
+        const AppState = {
+            clients: [], products: [], sales: [], expenses: [], cart: [], uploadedShipments: [] 
+        };
+
+        const pageState = {
+            sales: { current: 1, size: 15 },
+            products: { current: 1, size: 15 },
+            expenses: { current: 1, size: 15 },
+            logistics: { current: 1, size: 20 }
+        };
+
+        const formatter = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' });
+        const cleanDate = (val) => val && val.includes('T') ? val.split('T')[0] : String(val || '');
+        const toProperCase = (str) => String(str || '').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+        const normalizeStr = (str) => String(str || '').toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+        // Función de saneamiento para evitar XSS (Cross-Site Scripting)
+        const sanitizeHTML = (str) => {
+            if (!str) return '';
+            return String(str).replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+            });
+        };
+
+        // ==========================================
+        // UI MANAGERS (Toasts, Modals, Paginación)
+        // ==========================================
+        let confirmCallback = null;
+
+        const UI = {
+            showModal: (title, msg) => {
+                document.getElementById('modal-title').textContent = title;
+                document.getElementById('modal-message').textContent = msg;
+                document.getElementById('modal').removeAttribute('hidden');
+            },
+            hideModal: () => document.getElementById('modal').setAttribute('hidden', true),
+            
+            showToast: (title, message, type = 'success') => {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                let icon = type === 'success' ? '<i data-feather="check-circle" class="text-green-500"></i>' : '<i data-feather="alert-circle" class="text-red-500"></i>';
+                let border = type === 'success' ? 'border-green-500' : 'border-red-500';
+                toast.className = `bg-white dark:bg-gray-800 border-l-4 ${border} p-4 rounded-xl shadow-lg toast-enter flex items-start gap-3`;
+                // Se sanea el mensaje para evitar inyección en toasts
+                toast.innerHTML = `<div class="mt-0.5">${icon}</div><div><h4 class="text-sm font-bold">${sanitizeHTML(title)}</h4><p class="text-xs text-gray-500 mt-1">${sanitizeHTML(message)}</p></div>`;
+                container.appendChild(toast);
+                if (typeof feather !== 'undefined') feather.replace();
+                setTimeout(() => { toast.classList.replace('toast-enter', 'toast-exit'); setTimeout(() => toast.remove(), 300); }, 3500);
+            },
+
+            confirm: (title, message, onConfirm) => {
+                document.getElementById('confirm-title').textContent = title;
+                document.getElementById('confirm-message').textContent = message;
+                confirmCallback = onConfirm;
+                document.getElementById('confirm-modal').removeAttribute('hidden');
+            },
+            closeConfirm: () => {
+                document.getElementById('confirm-modal').setAttribute('hidden', true);
+                confirmCallback = null;
+            }
+        };
+
+        document.getElementById('confirm-cancel-btn').addEventListener('click', UI.closeConfirm);
+        document.getElementById('confirm-ok-btn').addEventListener('click', () => {
+            if(confirmCallback) confirmCallback();
+            UI.closeConfirm();
+        });
+
+        // Funciones de Paginación Universal
+        window.changePage = function(table, delta) {
+            pageState[table].current += delta;
+            if(table === 'sales') renderSalesTable();
+            if(table === 'products') renderProductsTable();
+            if(table === 'expenses') renderExpensesTable();
+            if(table === 'logistics') renderLogistics();
+        }
+
+        function renderPagination(containerId, tableId, totalItems) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const pageSize = pageState[tableId].size;
+            let currentPage = pageState[tableId].current;
+            
+            const totalPages = Math.ceil(totalItems / pageSize) || 1;
+            if (currentPage > totalPages) { currentPage = totalPages; pageState[tableId].current = currentPage; }
+
+            const start = totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+            const end = Math.min(currentPage * pageSize, totalItems);
+
+            container.innerHTML = `
+                <div class="text-xs text-gray-500">Mostrando ${start} a ${end} de ${totalItems}</div>
+                <div class="flex items-center gap-2">
+                    <button onclick="changePage('${tableId}', -1)" ${currentPage <= 1 ? 'disabled' : ''} class="px-2 py-1 bg-white dark:bg-gray-700 border dark:border-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"><i data-feather="chevron-left" class="w-4 h-4"></i></button>
+                    <span class="text-xs font-bold px-2 text-gray-700 dark:text-gray-300">${currentPage} / ${totalPages}</span>
+                    <button onclick="changePage('${tableId}', 1)" ${currentPage >= totalPages ? 'disabled' : ''} class="px-2 py-1 bg-white dark:bg-gray-700 border dark:border-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"><i data-feather="chevron-right" class="w-4 h-4"></i></button>
+                </div>
+            `;
+            if(typeof feather !== 'undefined') feather.replace();
+        }
+
+        function debounce(func, wait = 300) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        // ==========================================
+        // API & SYNC
+        // ==========================================
+        async function fetchGAS(action, payload = {}) {
+            if (!GAS_WEB_APP_URL) throw new Error("Falta configurar URL de Apps Script. Ve a la pestaña 'Ajustes'.");
+            
+            try {
+                const response = await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST', mode: 'cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action, payload })
+                });
+                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                const result = await response.json();
+                if (!result.success) throw new Error(result.error || "Error de Servidor");
+                return result.data;
+            } catch (error) { 
+                console.error(error);
+                throw new Error(error.message.includes("Falta configurar") ? error.message : "Error de red o CORS. Revisa que el Apps Script esté implementado para 'Cualquier usuario'."); 
+            }
+        }
+
+        async function syncData() {
+            UI.showModal("Sincronizando", "Leyendo base de datos remota...");
+            try {
+                const data = await fetchGAS('getData');
+                AppState.clients = data.clients || [];
+                AppState.products = data.products || [];
+                AppState.expenses = data.expenses || [];
+                
+                const rawSales = data.sales || [];
+                const salesMap = {};
+                
+                rawSales.forEach(item => {
+                    if(!salesMap[item.saleId]) {
+                        salesMap[item.saleId] = {
+                            id: item.saleId,
+                            clientName: item.clientName,
+                            clientPhone: item.clientPhone,
+                            date: cleanDate(item.date),
+                            medioDePago: item.medioDePago,
+                            total: 0,
+                            enviado: item.enviado === true || item.enviado === 'true' || item.enviado === 'TRUE',
+                            fechaEnvio: cleanDate(item.fechaEnvio),
+                            items: []
+                        };
+                    }
+                    salesMap[item.saleId].total += Number(item.total || 0);
+                    salesMap[item.saleId].items.push(item);
+                });
+                
+                AppState.sales = Object.values(salesMap);
+                UI.showToast("Sincronizado", "Los registros están actualizados.");
+                refreshAllViews(); 
+            } catch (e) {
+                UI.showToast("Error de Sistema", e.message, "error");
+            } finally {
+                UI.hideModal(); // Garantizar que el modal SIEMPRE se cierre, incluso si hay error
+            }
+        }
+
+        function refreshAllViews() {
+            renderSalesTable();
+            renderProductsTable();
+            renderExpensesTable();
+            renderLogistics(); 
+            renderCharts();
+            renderTopClients();
+            if(document.getElementById('report-date-filter').value) renderDailyClose();
+        }
+
+        // ==========================================
+        // INIT & EVENT DELEGATION
+        // ==========================================
+        
+        // Uso de Event Delegation para manejar botones generados dinámicamente
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('button[data-action]');
+            if (!btn) return;
+            
+            const action = btn.dataset.action;
+            const id = btn.dataset.id;
+            const extra = btn.dataset.extra;
+
+            if (action === 'delete-sale-item') triggerDeleteSaleItem(id);
+            if (action === 'delete-product') triggerDeleteProduct(id);
+            if (action === 'view-history') showProductHistory(id);
+            if (action === 'delete-history') triggerDeleteHistory(id, extra);
+            if (action === 'delete-expense') triggerDeleteExpense(id);
+            if (action === 'copy-shipment') copyShipment(decodeURIComponent(extra));
+        });
+
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('login-submit-btn');
+            
+            // Simular petición asíncrona al backend para validar Auth
+            btn.innerHTML = `<i data-feather="loader" class="w-5 h-5 animate-spin mx-auto text-white"></i>`;
+            if (typeof feather !== 'undefined') feather.replace();
+            btn.disabled = true;
+
+            setTimeout(() => {
+                // Validación Simple: A futuro debe moverse a Apps Script
+                if (document.getElementById('login-password').value === "123456") { 
+                    document.getElementById('auth-container').classList.add('hidden');
+                    document.getElementById('main-app').classList.remove('hidden');
+                    document.getElementById('main-app').classList.add('flex');
+                    
+                    if(GAS_WEB_APP_URL) document.getElementById('config-gas-url').value = GAS_WEB_APP_URL;
+
+                    const today = new Date().toISOString().split('T')[0];
+                    ['sale-date', 'product-purchase-date', 'mass-shipping-date', 'shipping-date-filter', 'report-date-filter', 'expense-date'].forEach(id => {
+                        if(document.getElementById(id)) document.getElementById(id).value = today;
+                    });
+                    
+                    if(GAS_WEB_APP_URL) {
+                        syncData();
+                    } else {
+                        UI.showToast("Atención", "No olvides configurar tu URL en Ajustes", "error");
+                    }
+                } else {
+                    btn.innerHTML = `<span>Ingresar</span> <i data-feather="arrow-right" class="ml-2 w-4 h-4"></i>`;
+                    if (typeof feather !== 'undefined') feather.replace();
+                    btn.disabled = false;
+                    UI.showToast("Acceso Denegado", "PIN incorrecto.", "error");
+                }
+            }, 800);
+        });
+
+        // Configuración Apps Script Block
+        const GAS_CODE_TEMPLATE = `// ==========================================
+// BACKEND NoSQL - GOOGLE APPSCRIPT
+// ARQUITECTURA: COLUMNA A (ID), COLUMNA B (JSON)
+// ==========================================
+
+const SHEETS = {
+  CLIENTES: 'Clientes',
+  PRODUCTOS: 'Productos',
+  VENTAS: 'Ventas',
+  GASTOS: 'Gastos' 
+};
+
+function doPost(e) {
+  try {
+    const params = JSON.parse(e.postData.contents);
+    const action = params.action;
+    const payload = params.payload;
+    let result = {};
+    
+    switch (action) {
+      case 'getData': result = getAllData(); break;
+      case 'saveSale': result = saveSale(payload); break;
+      case 'saveProduct': result = saveProduct(payload); break;
+      case 'deleteProduct': result = deleteProduct(payload.id); break;
+      case 'deleteSaleItem': result = deleteSaleItem(payload.id); break;
+      case 'updateShippingMasive': result = updateShippingMasive(payload.itemsIds, payload.fechaEnvio); break;
+      case 'deletePurchaseHistory': result = deletePurchaseHistory(payload.productId, payload.historyIndex); break;
+      case 'saveExpense': result = saveExpense(payload); break;
+      case 'deleteExpense': result = deleteExpense(payload.id); break;
+      default: throw new Error('Acción no reconocida');
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({ success: true, data: result }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, error: error.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  return ContentService.createTextOutput("🚀 Backend Activo en Modo NoSQL (2 Columnas).").setMimeType(ContentService.MimeType.TEXT);
+}
+
+// -------------------------------------------------------------------
+// FUNCIÓN CENTRAL: LECTURA EN 2 COLUMNAS
+// -------------------------------------------------------------------
+function getSheetData(sheetName) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+  if (!sheet) return [];
+  const data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return []; 
+  
+  const rows = [];
+  for (let i = 1; i < data.length; i++) {
+    if (!data[i][0]) continue; 
+    let obj = {};
+    try { obj = JSON.parse(data[i][1] || '{}'); } catch(e) {}
+    obj.id = data[i][0];
+    obj._rowIndex = i + 1; 
+    rows.push(obj);
+  }
+  return rows;
+}
+
+function getAllData() {
+  return {
+    clients: getSheetData(SHEETS.CLIENTES),
+    products: getSheetData(SHEETS.PRODUCTOS),
+    sales: getSheetData(SHEETS.VENTAS),
+    expenses: getSheetData(SHEETS.GASTOS)
+  };
+}
+
+// -------------------------------------------------------------------
+// GASTOS (NUEVO)
+// -------------------------------------------------------------------
+function saveExpense(data) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEETS.GASTOS);
+  const newId = Utilities.getUuid();
+  sheet.appendRow([newId, JSON.stringify(data)]);
+  return { id: newId };
+}
+
+function deleteExpense(id) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEETS.GASTOS);
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] === id) {
+      sheet.deleteRow(i + 1);
+      return { success: true };
+    }
+  }
+  throw new Error("Gasto no encontrado");
+}
+
+// -------------------------------------------------------------------
+// BORRAR ITEM DEL HISTORIAL DE INVENTARIO
+// -------------------------------------------------------------------
+function deletePurchaseHistory(productId, index) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEETS.PRODUCTOS);
+  const products = getSheetData(SHEETS.PRODUCTOS);
+  
+  const pIndex = products.findIndex(p => p.id === productId);
+  if (pIndex >= 0) {
+    const p = products[pIndex];
+    let history = p.history || [];
+    
+    if (index >= 0 && index < history.length) {
+      const removedLote = history.splice(index, 1)[0];
+      p.stock = (Number(p.stock) || 0) - (Number(removedLote.qty) || 0);
+      if (p.stock < 0) p.stock = 0;
+      
+      p.history = history;
+      
+      const rowIndex = p._rowIndex;
+      delete p.id;
+      delete p._rowIndex;
+      
+      sheet.getRange(rowIndex, 2).setValue(JSON.stringify(p));
+      return { success: true };
+    }
+  }
+  throw new Error("Producto o historial no encontrado");
+}
+
+// -------------------------------------------------------------------
+// GUARDAR PRODUCTO EN JSON
+// -------------------------------------------------------------------
+function saveProduct(data) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEETS.PRODUCTOS);
+  const products = getSheetData(SHEETS.PRODUCTOS);
+  
+  const existingProduct = products.find(p => p.name.toLowerCase() === data.name.toLowerCase());
+  const newHistoryEntry = { date: data.date, qty: data.stockToAdd, cost: data.cost };
+  
+  if (existingProduct) {
+    const oldStock = Number(existingProduct.stock) || 0;
+    const oldCost = Number(existingProduct.cost) || 0; 
+    const newTotalStock = oldStock + Number(data.stockToAdd);
+    
+    const oldTotalValue = oldStock * oldCost;
+    const newAverageCost = (oldTotalValue + Number(data.cost)) / newTotalStock;
+    
+    let history = existingProduct.history || [];
+    history.push(newHistoryEntry);
+    
+    existingProduct.stock = newTotalStock;
+    existingProduct.cost = newAverageCost;
+    existingProduct.history = history;
+    
+    const rowToUpdate = existingProduct._rowIndex;
+    delete existingProduct.id;
+    delete existingProduct._rowIndex;
+    
+    sheet.getRange(rowToUpdate, 2).setValue(JSON.stringify(existingProduct));
+    return { id: rowToUpdate, action: 'updated' };
+  } else {
+    const newId = Utilities.getUuid();
+    const unitCost = data.cost / data.stockToAdd;
+    const newProductObj = {
+      name: data.name,
+      stock: data.stockToAdd,
+      cost: unitCost,
+      purchaseDate: data.date,
+      history: [newHistoryEntry]
+    };
+    sheet.appendRow([newId, JSON.stringify(newProductObj)]);
+    return { id: newId, action: 'created' };
+  }
+}
+
+// -------------------------------------------------------------------
+// GUARDAR VENTA
+// -------------------------------------------------------------------
+function saveSale(data) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const salesSheet = ss.getSheetByName(SHEETS.VENTAS);
+  const clientsSheet = ss.getSheetByName(SHEETS.CLIENTES);
+  const productsSheet = ss.getSheetByName(SHEETS.PRODUCTOS);
+  
+  let clientId = data.clientId;
+  
+  if (!clientId) {
+    const clientsData = getSheetData(SHEETS.CLIENTES);
+    const existingClient = clientsData.find(c => String(c.phone) === String(data.clientPhone));
+    
+    if (existingClient) {
+      clientId = existingClient.id;
+    } else {
+      clientId = Utilities.getUuid();
+      clientsSheet.appendRow([clientId, JSON.stringify({ phone: data.clientPhone, name: data.clientName })]);
+    }
+  }
+  
+  const saleId = Utilities.getUuid(); 
+  const products = getSheetData(SHEETS.PRODUCTOS);
+  
+  data.items.forEach(item => {
+    const itemId = Utilities.getUuid(); 
+    const itemObj = {
+      saleId: saleId, clientId: clientId, clientPhone: data.clientPhone, date: data.date, medioDePago: data.medioDePago,
+      productId: item.productId, desc: item.desc, qty: item.qty, price: item.price, total: item.total,
+      totalCosto: item.totalCosto, color: item.color, talla: item.talla, enviado: false, fechaEnvio: ''
+    };
+    salesSheet.appendRow([itemId, JSON.stringify(itemObj)]);
+    
+    const pIndex = products.findIndex(p => p.id === item.productId);
+    if (pIndex >= 0) products[pIndex].stock = (Number(products[pIndex].stock) || 0) - item.qty;
+  });
+  
+  products.forEach(p => {
+    if (p._rowIndex) {
+        const rowIndex = p._rowIndex;
+        const pCopy = {...p};
+        delete pCopy.id;
+        delete pCopy._rowIndex;
+        productsSheet.getRange(rowIndex, 2).setValue(JSON.stringify(pCopy));
+    }
+  });
+  return { saleId: saleId };
+}
+
+// -------------------------------------------------------------------
+// ELIMINAR ITEM DE VENTA
+// -------------------------------------------------------------------
+function deleteSaleItem(itemId) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const salesSheet = ss.getSheetByName(SHEETS.VENTAS);
+  const data = salesSheet.getDataRange().getValues();
+  
+  let deleteRowIndex = -1;
+  let itemObj = null;
+  
+  for (let i = 1; i < data.length; i++) {
+    if(data[i][0] === itemId) {
+      deleteRowIndex = i + 1;
+      try { itemObj = JSON.parse(data[i][1]); } catch(e) {}
+      break;
+    }
+  }
+  
+  if (deleteRowIndex === -1 || !itemObj) throw new Error("Registro no encontrado.");
+  
+  if (itemObj.productId && itemObj.qty > 0) {
+    const productsSheet = ss.getSheetByName(SHEETS.PRODUCTOS);
+    const products = getSheetData(SHEETS.PRODUCTOS); 
+    const pIndex = products.findIndex(p => p.id === itemObj.productId);
+    if (pIndex >= 0) {
+      const p = products[pIndex];
+      p.stock = (Number(p.stock) || 0) + itemObj.qty;
+      const rowIndex = p._rowIndex;
+      const pCopy = {...p};
+      delete pCopy.id;
+      delete pCopy._rowIndex;
+      productsSheet.getRange(rowIndex, 2).setValue(JSON.stringify(pCopy));
+    }
+  }
+  
+  salesSheet.deleteRow(deleteRowIndex);
+  return { success: true };
+}
+
+// -------------------------------------------------------------------
+// ACTUALIZAR ENVÍO MASIVO
+// -------------------------------------------------------------------
+function updateShippingMasive(itemsIds, fechaEnvio) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEETS.VENTAS);
+  const data = sheet.getDataRange().getValues(); 
+  
+  for (let i = 1; i < data.length; i++) {
+    if(!data[i][0]) continue;
+    let itemObj;
+    try { itemObj = JSON.parse(data[i][1]); } catch(e) { continue; }
+    
+    if (itemsIds.includes(data[i][0])) {
+      itemObj.enviado = true;
+      itemObj.fechaEnvio = fechaEnvio;
+      sheet.getRange(i + 1, 2).setValue(JSON.stringify(itemObj));
+    }
+  }
+  return { success: true };
+}
+
+// -------------------------------------------------------------------
+// ELIMINAR PRODUCTO (Definitivo)
+// -------------------------------------------------------------------
+function deleteProduct(productId) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEETS.PRODUCTOS);
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] === productId) {
+      sheet.deleteRow(i + 1);
+      return { success: true };
+    }
+  }
+  throw new Error("Producto no encontrado");
+}`;
+
+        document.getElementById('gas-code-block').value = GAS_CODE_TEMPLATE;
+
+        window.copyGasCode = function() {
+            const ta = document.getElementById('gas-code-block');
+            ta.select();
+            document.execCommand('copy');
+            UI.showToast("Copiado", "Código copiado al portapapeles.");
+        }
+
+        document.getElementById('config-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            GAS_WEB_APP_URL = document.getElementById('config-gas-url').value.trim();
+            localStorage.setItem('latam5s_gas_url', GAS_WEB_APP_URL);
+            UI.showToast("Guardado", "La URL de Apps Script se ha guardado localmente.");
+        });
+
+        document.getElementById('btn-sync-now').addEventListener('click', syncData);
+        document.getElementById('logoutButton').addEventListener('click', () => location.reload());
+        
+        document.getElementById('darkModeToggle').addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            renderCharts();
+        });
+
+        document.querySelectorAll('.tab-btn').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('bg-white', 'dark:bg-gray-700', 'text-brand-accent', 'shadow'));
+                document.querySelectorAll('.tab-panel').forEach(p => p.setAttribute('hidden', true));
+                tab.classList.add('bg-white', 'dark:bg-gray-700', 'text-brand-accent', 'shadow');
+                document.getElementById(tab.getAttribute('data-tab') + '-panel').removeAttribute('hidden');
+                if(tab.getAttribute('data-tab') === 'reports') { renderCharts(); renderTopClients(); }
+            });
+        });
+
+        // ==========================================
+        // AUTOCOMPLETADO
+        // ==========================================
+        let activeAutocomplete = null;
+        function showAutocomplete(container, results) {
+            container.innerHTML = '';
+            if (results.length === 0) return container.classList.add('hidden');
+            results.forEach(item => {
+                const div = document.createElement('div'); div.className = 'autocomplete-item'; div.innerHTML = item.html;
+                div.onclick = item.onClick; container.appendChild(div);
+            });
+            container.classList.remove('hidden'); activeAutocomplete = container;
+        }
+        function hideAutocomplete() { document.querySelectorAll('.autocomplete-results').forEach(el => el.classList.add('hidden')); activeAutocomplete = null; }
+        document.addEventListener('click', (e) => { if (activeAutocomplete && !activeAutocomplete.contains(e.target)) hideAutocomplete(); });
+
+        document.getElementById('client-search').addEventListener('input', debounce((e) => {
+            const query = e.target.value.toLowerCase();
+            if (!query) return hideAutocomplete();
+            const results = AppState.clients.filter(c => String(c.phone).toLowerCase().includes(query)).map(c => ({
+                html: `<strong>${sanitizeHTML(c.phone)}</strong>`, onClick: () => { 
+                    e.target.value = c.phone; 
+                    const clientIdInput = document.getElementById('sale-client-id');
+                    if (clientIdInput) clientIdInput.value = c.id; 
+                    hideAutocomplete(); 
+                }
+            }));
+            showAutocomplete(document.getElementById('client-search-results'), results);
+        }, 200));
+
+        document.getElementById('sale-product-search').addEventListener('input', debounce((e) => {
+            const query = e.target.value.toLowerCase();
+            if (!query) return hideAutocomplete();
+            const results = AppState.products.filter(p => String(p.name).toLowerCase().includes(query)).map(p => ({
+                html: `<div class="flex justify-between w-full"><span><strong>${sanitizeHTML(p.name)}</strong></span><span class="text-xs px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 font-bold text-gray-600 dark:text-gray-300">Stock: ${p.stock}</span></div>`,
+                onClick: () => { 
+                    if(p.stock <= 0) return UI.showToast("Sin Stock", "No hay unidades.", "error");
+                    e.target.value = p.name; document.getElementById('sale-product-id').value = p.id; hideAutocomplete(); 
+                }
+            }));
+            showAutocomplete(document.getElementById('sale-product-search-results'), results);
+        }, 200));
+
+        document.getElementById('product-search-inventory').addEventListener('input', debounce((e) => {
+            const query = e.target.value.toLowerCase();
+            if (!query) return hideAutocomplete();
+            const results = AppState.products.filter(p => String(p.name).toLowerCase().includes(query)).map(p => ({
+                html: `<div class="flex justify-between w-full"><span><strong>${sanitizeHTML(p.name)}</strong></span><span class="text-xs px-2 py-1 rounded bg-gray-100 dark:bg-gray-700">Stock: ${p.stock}</span></div>`,
+                onClick: () => { e.target.value = p.name; hideAutocomplete(); }
+            }));
+            const exactMatch = AppState.products.find(p => String(p.name).toLowerCase() === query.trim());
+            if (!exactMatch && query.trim().length > 0) {
+                results.push({
+                    html: `<div class="text-brand-accent flex items-center gap-2 mt-1"><i data-feather="plus-circle" class="w-4 h-4"></i> Crear nuevo: <strong>${sanitizeHTML(toProperCase(query))}</strong></div>`,
+                    onClick: () => { e.target.value = toProperCase(query); hideAutocomplete(); }
+                });
+            }
+            showAutocomplete(document.getElementById('product-search-inventory-results'), results);
+            if(typeof feather !== 'undefined') feather.replace();
+        }, 200));
+
+        // ==========================================
+        // LÓGICA DE VENTAS
+        // ==========================================
+        function renderCart() {
+            const list = document.getElementById('current-sale-items');
+            let total = 0;
+            
+            // Renderizado en memoria (cero lag)
+            const html = AppState.cart.map((item, idx) => {
+                total += item.total;
+                return `
+                    <li class="flex justify-between items-center p-2 border rounded-lg mb-2 dark:border-gray-700">
+                        <div>
+                            <span class="font-bold">${item.qty}x ${sanitizeHTML(toProperCase(item.desc))}</span>
+                            <span class="text-xs text-gray-500 block">${sanitizeHTML(item.color)} ${sanitizeHTML(item.talla)}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="font-bold text-brand-accent">S/ ${item.total.toFixed(2)}</span>
+                            <button type="button" onclick="AppState.cart.splice(${idx}, 1); renderCart()" class="text-red-500"><i data-feather="trash-2" class="w-4 h-4"></i></button>
+                        </div>
+                    </li>`;
+            }).join('');
+            
+            list.innerHTML = html;
+            document.getElementById('current-sale-total').textContent = total.toFixed(2);
+            document.getElementById('item-count-badge').textContent = AppState.cart.length + " items";
+            if (typeof feather !== 'undefined') feather.replace();
+        }
+
+        document.getElementById('add-sale-item-btn').addEventListener('click', () => {
+            const qty = parseInt(document.getElementById('sale-item-qty').value);
+            const total = parseFloat(document.getElementById('sale-item-price').value);
+            const productId = document.getElementById('sale-product-id').value;
+            const desc = normalizeStr(document.getElementById('sale-product-search').value);
+            
+            if(!qty || total < 0 || !productId || !desc) return UI.showToast("Atención", "Revisa producto y precio.", "error");
+            
+            const p = AppState.products.find(x => x.id === productId);
+            AppState.cart.push({
+                productId, desc, qty, price: total / qty, total: total,
+                costo: p.cost, totalCosto: p.cost * qty,
+                color: normalizeStr(document.getElementById('sale-item-color').value),
+                talla: normalizeStr(document.getElementById('sale-item-talla').value)
+            });
+            
+            ['sale-product-search', 'sale-product-id', 'sale-item-price', 'sale-item-color', 'sale-item-talla'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('sale-item-qty').value = 1;
+            renderCart();
+        });
+
+        document.getElementById('add-sale-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(AppState.cart.length === 0) return UI.showToast("Carrito Vacío", "Agrega items.", "error");
+            
+            const phone = document.getElementById('client-search').value.trim();
+            if (!phone) return UI.showToast("Falta Cliente", "Agrega el teléfono.", "error");
+
+            let cid = document.getElementById('sale-client-id')?.value || '';
+            if (!cid) {
+                const existingClient = AppState.clients.find(c => String(c.phone) === String(phone));
+                if (existingClient) cid = existingClient.id;
+            }
+
+            const payload = {
+                clientId: cid, clientPhone: phone, clientName: phone,
+                date: document.getElementById('sale-date').value,
+                medioDePago: document.getElementById('sale-payment-method').value,
+                items: AppState.cart 
+            };
+
+            UI.showModal("Guardando...", "Escribiendo en base remota...");
+            try {
+                await fetchGAS('saveSale', payload);
+                AppState.cart = []; renderCart();
+                document.getElementById('add-sale-form').reset();
+                if(document.getElementById('sale-client-id')) document.getElementById('sale-client-id').value = '';
+                document.getElementById('sale-date').value = new Date().toISOString().split('T')[0];
+                await syncData();
+                UI.showToast("Excelente", "Venta procesada exitosamente.");
+            } catch (err) {  
+                UI.showToast("Error", err.message, "error"); 
+            } finally {
+                UI.hideModal();
+            }
+        });
+
+        // Búsqueda y Paginación Ventas
+        document.getElementById('client-sales-filter-search').addEventListener('input', debounce(() => { pageState.sales.current = 1; renderSalesTable(); }, 300));
+        document.getElementById('product-sales-filter-search').addEventListener('input', debounce(() => { pageState.sales.current = 1; renderSalesTable(); }, 300));
+        document.getElementById('date-sales-filter').addEventListener('change', () => { pageState.sales.current = 1; renderSalesTable(); });
+        document.getElementById('pending-sales-filter-toggle').addEventListener('change', () => { pageState.sales.current = 1; renderSalesTable(); });
+
+        function renderSalesTable() {
+            const tbody = document.getElementById('sales-list'); 
+            
+            const showPendingOnly = document.getElementById('pending-sales-filter-toggle').checked;
+            const clientQuery = document.getElementById('client-sales-filter-search').value.toLowerCase();
+            const productQuery = document.getElementById('product-sales-filter-search').value.toLowerCase();
+            const dateQuery = document.getElementById('date-sales-filter').value;
+            
+            let allItems = [];
+            AppState.sales.forEach(sale => {
+                sale.items.forEach(item => {
+                    if (showPendingOnly && item.enviado) return;
+                    if (clientQuery && !String(item.clientPhone).toLowerCase().includes(clientQuery) && !String(sale.clientName||'').toLowerCase().includes(clientQuery)) return;
+                    if (productQuery && !String(item.desc).toLowerCase().includes(productQuery)) return;
+                    if (dateQuery && item.date !== dateQuery) return;
+                    allItems.push(item);
+                });
+            });
+            
+            allItems.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+            const totalItems = allItems.length;
+            const startIndex = (pageState.sales.current - 1) * pageState.sales.size;
+            const paginatedItems = allItems.slice(startIndex, startIndex + pageState.sales.size);
+
+            tbody.innerHTML = paginatedItems.map(item => {
+                let productHtml = `<span class="font-bold text-xs">${item.qty}x ${sanitizeHTML(toProperCase(item.desc))}</span>`;
+                if (item.color || item.talla) productHtml += `<br><span class="text-[10px] text-gray-500">${sanitizeHTML(item.color) || ''} ${sanitizeHTML(item.talla) || ''}</span>`;
+                
+                const status = item.enviado ? `<span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">Enviado</span>` : `<span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs font-bold">Pendiente</span>`;
+
+                return `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 text-sm">
+                        <td class="px-4 py-3"><strong>${sanitizeHTML(item.clientPhone)}</strong><br><span class="text-xs text-gray-500">${sanitizeHTML(item.date)}</span></td>
+                        <td class="px-4 py-3 leading-tight">${productHtml}</td>
+                        <td class="px-4 py-3 text-right font-bold text-accent">${formatter.format(item.total)}<br><span class="text-[10px] text-gray-400 font-medium">${sanitizeHTML(item.medioDePago)}</span></td>
+                        <td class="px-4 py-3 text-center">${status}<br><span class="text-[10px] text-gray-400 mt-1 block">${sanitizeHTML(item.fechaEnvio) || ''}</span></td>
+                        <td class="px-4 py-3 text-right">
+                            <button data-action="delete-sale-item" data-id="${item.id}" title="Anular artículo" class="text-gray-400 hover:text-red-500 p-2 bg-gray-50 hover:bg-red-50 dark:bg-gray-800 rounded-lg transition-colors"><i data-feather="trash-2" class="w-4 h-4"></i></button>
+                        </td>
+                    </tr>`;
+            }).join('');
+            
+            renderPagination('sales-pagination', 'sales', totalItems);
+            if(typeof feather !== 'undefined') feather.replace();
+        }
+
+        function triggerDeleteSaleItem(itemId) {
+            UI.confirm("¿Eliminar este artículo?", "Se anulará de la venta y se recuperará el stock.", async () => {
+                UI.showModal("Anulando...", "Restaurando inventario...");
+                try {
+                    await fetchGAS('deleteSaleItem', { id: itemId });
+                    await syncData();
+                    UI.showToast("Anulada", "Artículo removido.");
+                } catch(e) { 
+                    UI.showToast("Error", e.message, "error"); 
+                } finally { UI.hideModal(); }
+            });
+        }
+
+        // ==========================================
+        // PRODUCTOS
+        // ==========================================
+        document.getElementById('add-product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                name: document.getElementById('product-search-inventory').value,
+                stockToAdd: parseInt(document.getElementById('product-stock').value),
+                cost: parseFloat(document.getElementById('product-cost').value),
+                date: document.getElementById('product-purchase-date').value
+            };
+            UI.showModal("Guardando...", "Registrando ingreso...");
+            try {
+                await fetchGAS('saveProduct', payload);
+                await syncData();
+                UI.showToast("Inventario Actualizado", "Producto listo.");
+                document.getElementById('add-product-form').reset();
+                document.getElementById('product-purchase-date').value = new Date().toISOString().split('T')[0];
+            } catch(e) { 
+                UI.showToast("Error", e.message, "error"); 
+            } finally { UI.hideModal(); }
+        });
+
+        document.getElementById('product-directory-search').addEventListener('input', debounce(() => { pageState.products.current = 1; renderProductsTable(); }, 300));
+
+        function renderProductsTable() {
+            const tbody = document.getElementById('products-list'); 
+            const query = document.getElementById('product-directory-search').value.toLowerCase();
+            
+            let filtered = AppState.products;
+            if(query) filtered = filtered.filter(p => String(p.name).toLowerCase().includes(query));
+
+            const totalItems = filtered.length;
+            const startIndex = (pageState.products.current - 1) * pageState.products.size;
+            const paginatedItems = filtered.slice(startIndex, startIndex + pageState.products.size);
+
+            tbody.innerHTML = paginatedItems.map(p => `
+                <tr class="text-sm border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <td class="px-6 py-3 font-bold">${sanitizeHTML(p.name)}</td>
+                    <td class="px-6 py-3 text-center"><span class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded font-bold">${p.stock}</span></td>
+                    <td class="px-6 py-3 text-right text-gray-500">${formatter.format(p.cost)}</td>
+                    <td class="px-6 py-3 text-center">
+                        <button data-action="view-history" data-id="${p.id}" title="Ver Historial" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-gray-800 p-1.5 rounded-lg mr-2 transition-colors"><i data-feather="clock" class="w-4 h-4"></i></button>
+                        <button data-action="delete-product" data-id="${p.id}" title="Borrar Producto" class="text-gray-400 hover:text-red-500 bg-gray-50 dark:bg-gray-800 p-1.5 rounded-lg transition-colors"><i data-feather="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            renderPagination('products-pagination', 'products', totalItems);
+            if(typeof feather !== 'undefined') feather.replace();
+        }
+        
+        function triggerDeleteProduct(id) {
+            UI.confirm("¿Borrar Producto?", "Se eliminará de la base. Las ventas históricas se conservan.", async () => {
+                UI.showModal("Borrando...", "Eliminando de Sheets...");
+                try { 
+                    await fetchGAS('deleteProduct', { id }); 
+                    await syncData(); 
+                } catch(e) { UI.showToast("Error", e.message, "error"); } finally { UI.hideModal(); }
+            });
+        }
+
+        function showProductHistory(id) {
+            const p = AppState.products.find(x => x.id === id);
+            if(!p) return;
+            
+            document.getElementById('history-title').textContent = `Compras: ${sanitizeHTML(toProperCase(p.name))}`;
+            const list = document.getElementById('history-list');
+            const historyWithIndex = (p.history || []).map((h, i) => ({...h, originalIndex: i}));
+            
+            if(historyWithIndex.length === 0) {
+                list.innerHTML = '<li class="text-center text-gray-500 py-6">No hay historial.</li>';
+            } else {
+                list.innerHTML = historyWithIndex.sort((a,b) => new Date(b.date) - new Date(a.date)).map(h => {
+                    const unitPrice = h.cost / h.qty;
+                    return `
+                        <li class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl flex justify-between items-center border border-gray-200 dark:border-gray-600">
+                            <div>
+                                <span class="font-bold text-sm block text-gray-900 dark:text-white">${sanitizeHTML(h.date)}</span>
+                                <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-1 block"><i data-feather="plus" class="w-3 h-3 inline"></i> ${h.qty} uds. agregadas</span>
+                            </div>
+                            <div class="text-right flex flex-col items-end">
+                                <span class="font-bold text-brand-accent text-lg">${formatter.format(h.cost)}</span>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-[10px] font-medium text-gray-400">${formatter.format(unitPrice)} c/u</span>
+                                    <button data-action="delete-history" data-id="${p.id}" data-extra="${h.originalIndex}" class="text-red-400 hover:text-red-600"><i data-feather="trash-2" class="w-3.5 h-3.5"></i></button>
+                                </div>
+                            </div>
+                        </li>`;
+                }).join('');
+            }
+            document.getElementById('history-modal').removeAttribute('hidden');
+            if(typeof feather !== 'undefined') feather.replace();
+        }
+
+        function triggerDeleteHistory(productId, historyIndex) {
+            UI.confirm("¿Eliminar ingreso?", "Se restarán estas unidades del stock actual.", async () => {
+                UI.showModal("Actualizando...", "Restando stock...");
+                try {
+                    await fetchGAS('deletePurchaseHistory', { productId, historyIndex });
+                    await syncData();
+                    UI.showToast("Eliminado", "Historial actualizado.");
+                    showProductHistory(productId);
+                } catch(e) { UI.showToast("Error", e.message, "error"); } finally { UI.hideModal(); }
+            });
+        }
+
+        // ==========================================
+        // GASTOS
+        // ==========================================
+        document.getElementById('add-expense-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                desc: document.getElementById('expense-desc').value.trim(),
+                amount: parseFloat(document.getElementById('expense-amount').value),
+                date: document.getElementById('expense-date').value
+            };
+            UI.showModal("Guardando...", "Registrando el gasto...");
+            try {
+                await fetchGAS('saveExpense', payload);
+                await syncData();
+                UI.showToast("Éxito", "Gasto guardado.");
+                document.getElementById('add-expense-form').reset();
+                document.getElementById('expense-date').value = new Date().toISOString().split('T')[0];
+            } catch(err) { UI.showToast("Error", err.message, "error"); } finally { UI.hideModal(); }
+        });
+
+        function renderExpensesTable() {
+            const tbody = document.getElementById('expenses-list'); 
+            
+            if(AppState.expenses.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-400">No hay gastos.</td></tr>`;
+                document.getElementById('expenses-pagination').innerHTML = '';
+                return;
+            }
+
+            const sortedExpenses = [...AppState.expenses].sort((a,b) => new Date(b.date) - new Date(a.date));
+            const totalItems = sortedExpenses.length;
+            const startIndex = (pageState.expenses.current - 1) * pageState.expenses.size;
+            const paginatedItems = sortedExpenses.slice(startIndex, startIndex + pageState.expenses.size);
+
+            tbody.innerHTML = paginatedItems.map(exp => `
+                <tr class="text-sm border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <td class="px-6 py-4 text-gray-500">${sanitizeHTML(exp.date)}</td>
+                    <td class="px-6 py-4 font-bold">${sanitizeHTML(toProperCase(exp.desc))}</td>
+                    <td class="px-6 py-4 text-right font-bold text-red-500">- ${formatter.format(exp.amount)}</td>
+                    <td class="px-6 py-4 text-center">
+                        <button data-action="delete-expense" data-id="${exp.id}" class="text-gray-400 hover:text-red-500 p-1.5 rounded-lg"><i data-feather="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            renderPagination('expenses-pagination', 'expenses', totalItems);
+            if(typeof feather !== 'undefined') feather.replace();
+        }
+
+        function triggerDeleteExpense(id) {
+            UI.confirm("¿Eliminar Gasto?", "Se eliminará permanentemente.", async () => {
+                UI.showModal("Eliminando", "Actualizando libros...");
+                try { 
+                    await fetchGAS('deleteExpense', { id }); 
+                    await syncData(); 
+                } catch(e) { UI.showToast("Error", e.message, "error"); } finally { UI.hideModal(); }
+            });
+        }
+
+        // ==========================================
+        // LOGÍSTICA & EXCEL
+        // ==========================================
+        document.getElementById('shipping-date-filter').addEventListener('change', () => {
+            AppState.uploadedShipments = []; 
+            document.getElementById('shipping-excel-upload').value = '';
+            document.getElementById('clear-excel-btn').classList.add('hidden');
+            pageState.logistics.current = 1;
+            renderLogistics();
+        });
+
+        document.getElementById('shipping-excel-upload').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const data = new Uint8Array(evt.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
+                    
+                    AppState.uploadedShipments = json.map(row => {
+                        const phoneRaw = row['Teléfono'] || row['Telefono'] || row['Tel'] || row['phone'] || Object.values(row)[3] || '';
+                        const clientName = row['Cliente'] || row['Nombre'] || Object.values(row)[2] || '';
+                        const courier = row['Courier'] || row['courier'] || Object.values(row)[1] || 'Sin Courier';
+                        
+                        return {
+                            phone: String(phoneRaw).replace(/\D/g, ''),
+                            name: clientName,
+                            courier: String(courier).trim(),
+                        };
+                    }).filter(x => x.phone.length > 0);
+                    
+                    document.getElementById('shipping-date-filter').value = ''; 
+                    document.getElementById('clear-excel-btn').classList.remove('hidden');
+                    UI.showToast("Excel Cargado", `Se identificaron ${AppState.uploadedShipments.length} clientes.`);
+                    pageState.logistics.current = 1;
+                    renderLogistics();
+                } catch(err) {
+                    UI.showToast("Error Excel", "Formato no soportado.", "error");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        document.getElementById('clear-excel-btn').addEventListener('click', () => {
+            AppState.uploadedShipments = [];
+            document.getElementById('shipping-excel-upload').value = '';
+            document.getElementById('clear-excel-btn').classList.add('hidden');
+            pageState.logistics.current = 1;
+            renderLogistics();
+        });
+
+        function renderLogistics() {
+            const date = document.getElementById('shipping-date-filter').value;
+            const tbody = document.getElementById('all-shipments-list'); 
+            const massShippingBar = document.getElementById('mass-shipping-bar');
+            
+            let displayShipments = [];
+
+            if (AppState.uploadedShipments && AppState.uploadedShipments.length > 0) {
+                massShippingBar.classList.remove('hidden');
+                AppState.uploadedShipments.forEach(ship => {
+                    let pendingItems = [];
+                    AppState.sales.forEach(sale => {
+                        sale.items.forEach(item => {
+                            if (!item.enviado && String(item.clientPhone).replace(/\D/g, '') === ship.phone) pendingItems.push(item);
+                        });
+                    });
+                    displayShipments.push({
+                        isExcel: true, clientPhone: ship.phone, clientName: ship.name, courier: ship.courier,
+                        items: pendingItems, totalItems: pendingItems.reduce((sum, item) => sum + Number(item.qty), 0),
+                        date: new Date().toISOString().split('T')[0]
+                    });
+                });
+            } else if (date) {
+                massShippingBar.classList.add('hidden');
+                const shipmentsByClient = {};
+                AppState.sales.forEach(sale => {
+                    sale.items.forEach(item => {
+                        if(item.enviado && item.fechaEnvio === date) {
+                            if (!shipmentsByClient[item.clientPhone]) {
+                                shipmentsByClient[item.clientPhone] = { isExcel: false, clientPhone: item.clientPhone, clientName: sale.clientName || 'Cliente', courier: '-', date: date, items: [], totalItems: 0 };
+                            }
+                            shipmentsByClient[item.clientPhone].items.push(item);
+                            shipmentsByClient[item.clientPhone].totalItems += Number(item.qty);
+                        }
+                    });
+                });
+                displayShipments = Object.values(shipmentsByClient);
+            } else {
+                massShippingBar.classList.add('hidden');
+                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400">Seleccione fecha o cargue Excel para cruzar datos.</td></tr>`; 
+                document.getElementById('logistics-pagination').innerHTML = '';
+                return;
+            }
+
+            displayShipments.sort((a, b) => {
+                const cA = (a.courier || '').toLowerCase(); const cB = (b.courier || '').toLowerCase();
+                if (cA < cB) return -1; if (cA > cB) return 1; return b.totalItems - a.totalItems;
+            });
+
+            if (displayShipments.length === 0) { 
+                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-500">No hay despachos para mostrar.</td></tr>`; 
+                document.getElementById('logistics-pagination').innerHTML = '';
+                return; 
+            }
+
+            const totalItems = displayShipments.length;
+            const startIndex = (pageState.logistics.current - 1) * pageState.logistics.size;
+            const paginatedItems = displayShipments.slice(startIndex, startIndex + pageState.logistics.size);
+
+            tbody.innerHTML = paginatedItems.map(shipment => {
+                let detailLines = `<li class="text-xs py-1 text-gray-400 italic">No tiene prendas pendientes.</li>`;
+                let actionBtn = ''; let checkboxHtml = '';
+                
+                if (shipment.items.length > 0) {
+                    detailLines = shipment.items.map(i => `<li class="text-xs py-1 border-b dark:border-gray-700"><strong>${i.qty}x ${sanitizeHTML(toProperCase(i.desc))}</strong> (${sanitizeHTML(i.color)} / ${sanitizeHTML(i.talla)})</li>`).join('');
+                    const shipmentData = { clientPhone: shipment.clientPhone, date: shipment.date, items: shipment.items };
+                    actionBtn = `<button data-action="copy-shipment" data-extra="${encodeURIComponent(JSON.stringify(shipmentData))}" class="p-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg text-gray-600 dark:text-white transition-colors"><i data-feather="copy" class="w-4 h-4"></i></button>`;
+                    if (shipment.isExcel) checkboxHtml = `<input type="checkbox" class="shipping-checkbox rounded w-4 h-4 cursor-pointer" data-ids="${shipment.items.map(i => i.id).join(',')}">`;
+                }
+
+                return `
+                    <tr class="text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                        <td class="px-4 py-4 text-center">${checkboxHtml}</td>
+                        <td class="px-6 py-4 font-semibold text-gray-600 dark:text-gray-300">${sanitizeHTML(toProperCase(shipment.courier))}</td>
+                        <td class="px-6 py-4"><strong>${sanitizeHTML(toProperCase(shipment.clientName)) || 'Cliente'}</strong><br><span class="text-xs text-gray-500 font-mono">${sanitizeHTML(shipment.clientPhone)}</span></td>
+                        <td class="px-6 py-4"><ul>${detailLines}</ul></td>
+                        <td class="px-6 py-4 text-right">${actionBtn}</td>
+                    </tr>`;
+            }).join('');
+            
+            renderPagination('logistics-pagination', 'logistics', totalItems);
+            if(typeof feather !== 'undefined') feather.replace();
+        }
+
+        document.getElementById('select-all-shipping-checkbox').addEventListener('change', (e) => {
+            document.querySelectorAll('.shipping-checkbox').forEach(cb => cb.checked = e.target.checked);
+        });
+
+        document.getElementById('mass-update-shipping-btn').addEventListener('click', async () => {
+            const date = document.getElementById('mass-shipping-date').value;
+            const checkedBoxes = Array.from(document.querySelectorAll('.shipping-checkbox:checked'));
+            let allItemsIds = [];
+            checkedBoxes.forEach(cb => { if (cb.dataset.ids) allItemsIds = allItemsIds.concat(cb.dataset.ids.split(',')); });
+
+            if(!date || !allItemsIds.length) return UI.showToast("Atención", "Elige fecha y marca clientes.", "error");
+            
+            UI.showModal("Despachando...", `Actualizando ${allItemsIds.length} envíos...`);
+            try {
+                await fetchGAS('updateShippingMasive', { itemsIds: allItemsIds, fechaEnvio: date });
+                await syncData();
+                UI.showToast("Éxito", `Envíos procesados correctamente.`);
+                document.getElementById('select-all-shipping-checkbox').checked = false;
+            } catch(e) { UI.showToast("Error", e.message, "error"); } finally { UI.hideModal(); }
+        });
+
+        function copyShipment(saleEncoded) {
+            const sale = JSON.parse(saleEncoded);
+            let totalPrendas = 0; let txt = `*📦 DETALLE DE ENVÍO*\n\n*📅 Fecha:* ${sale.date}\n\n*🛍️ Compras incluidas:*\n\n`;
+            
+            sale.items.forEach(i => {
+                totalPrendas += Number(i.qty) || 0;
+                let itemDesc = `🌻 *${i.qty} x ${toProperCase(i.desc)}*`;
+                let attrs = [];
+                if (i.color) attrs.push(`color: ${i.color.toLowerCase()}`);
+                if (i.talla) attrs.push(`talla: ${i.talla}`);
+                if (attrs.length > 0) itemDesc += ` _(${attrs.join(', ')})_`;
+                txt += itemDesc + `\n\n`;
+            });
+            
+            txt += `✅ *Total de prendas: ${totalPrendas}*\n\n_Atte. CompliCompras_`;
+            
+            const ta = document.createElement("textarea"); ta.value = txt; ta.style.position = "fixed"; document.body.appendChild(ta);
+            ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+            UI.showToast("Copiado", "Mensaje listo para WhatsApp.");
+        }
+
+        // ==========================================
+        // GRÁFICOS Y REPORTES
+        // ==========================================
+        let salesChartInstance, purchasesChartInstance;
+
+        function renderCharts() { 
+            const currentYear = new Date().getFullYear();
+            const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            
+            let salesData = new Array(12).fill(0);
+            let purchasesData = new Array(12).fill(0);
+
+            AppState.sales.forEach(sale => {
+                sale.items.forEach(item => {
+                    if (item.date) {
+                        const parts = item.date.split('-');
+                        if (parts.length === 3 && parseInt(parts[0]) === currentYear) salesData[parseInt(parts[1]) - 1] += Number(item.total) || 0;
+                    }
+                });
+            });
+
+            AppState.products.forEach(p => {
+                (p.history || []).forEach(h => {
+                    if (h.date) {
+                        const parts = h.date.split('-');
+                        if (parts.length === 3 && parseInt(parts[0]) === currentYear) purchasesData[parseInt(parts[1]) - 1] += Number(h.cost) || 0;
+                    }
+                });
+            });
+
+            AppState.expenses.forEach(e => {
+                if (e.date) {
+                    const parts = e.date.split('-');
+                    if (parts.length === 3 && parseInt(parts[0]) === currentYear) purchasesData[parseInt(parts[1]) - 1] += Number(e.amount) || 0;
+                }
+            });
+
+            const isDark = document.documentElement.classList.contains('dark');
+            const commonOptions = {
+                responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                scales: { x: { ticks: { color: isDark ? '#94a3b8' : '#64748b' }, grid: { display: false } }, y: { ticks: { color: isDark ? '#94a3b8' : '#64748b' }, grid: { color: isDark ? '#334155' : '#f1f5f9' }, beginAtZero: true } }
+            };
+
+            const ctxS = document.getElementById('salesChart');
+            if (ctxS) {
+                if (salesChartInstance) salesChartInstance.destroy();
+                salesChartInstance = new Chart(ctxS.getContext('2d'), { type: 'bar', data: { labels: months, datasets: [{ data: salesData, backgroundColor: '#3B82F6', borderRadius: 4 }] }, options: commonOptions });
+            }
+
+            const ctxP = document.getElementById('purchasesChart');
+            if (ctxP) {
+                if (purchasesChartInstance) purchasesChartInstance.destroy();
+                purchasesChartInstance = new Chart(ctxP.getContext('2d'), { type: 'bar', data: { labels: months, datasets: [{ data: purchasesData, backgroundColor: '#10B981', borderRadius: 4 }] }, options: commonOptions });
+            }
+        }
+
+        function renderTopClients() { 
+            const list = document.getElementById('top-clients-list');
+            if (!list) return;
+            const clientTotals = new Map();
+
+            AppState.sales.forEach(sale => {
+                sale.items.forEach(item => {
+                    const phone = String(item.clientPhone).trim();
+                    if(phone) clientTotals.set(phone, (clientTotals.get(phone) || 0) + Number(item.total));
+                });
+            });
+
+            const sorted = Array.from(clientTotals.entries()).map(([phone, total]) => ({ phone, total })).sort((a, b) => b.total - a.total).slice(0, 10);
+
+            if (sorted.length === 0) { list.innerHTML = '<li class="p-4 text-center text-gray-400">Sin datos aún.</li>'; return; }
+
+            list.innerHTML = sorted.map((c, i) => {
+                let badge = `<span class="text-sm font-bold text-gray-400 w-8 text-center">${i + 1}</span>`;
+                if(i===0) badge = `<span class="text-2xl w-8 text-center">🥇</span>`;
+                if(i===1) badge = `<span class="text-2xl w-8 text-center">🥈</span>`;
+                if(i===2) badge = `<span class="text-2xl w-8 text-center">🥉</span>`;
+
+                return `
+                    <li class="flex items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl">
+                        <div class="flex items-center gap-3">${badge}<div><p class="text-sm font-bold">${sanitizeHTML(c.phone)}</p><a href="https://wa.me/${sanitizeHTML(c.phone)}" target="_blank" class="text-[10px] text-green-500 hover:text-green-600 font-medium flex items-center"><i data-feather="message-circle" class="w-3 h-3 mr-1"></i> Contactar</a></div></div>
+                        <span class="font-black text-brand-accent">${formatter.format(c.total)}</span>
+                    </li>`;
+            }).join('');
+            if (typeof feather !== 'undefined') feather.replace();
+        }
+
+        document.getElementById('report-date-filter').addEventListener('change', renderDailyClose);
+
+        function renderDailyClose() {
+            const date = document.getElementById('report-date-filter').value;
+            const tbody = document.getElementById('report-results-tbody');
+            if(!date) return;
+
+            let dailyTotal = 0; const groups = {}; let salesCount = 0;
+
+            AppState.sales.forEach(s => {
+                s.items.forEach(item => {
+                    if (item.date === date) {
+                        salesCount++; const medio = item.medioDePago || 'N/A';
+                        if(!groups[medio]) groups[medio] = { count: 0, total: 0 };
+                        groups[medio].count++; groups[medio].total += Number(item.total); dailyTotal += Number(item.total);
+                    }
+                });
+            });
+
+            if(salesCount === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-gray-500">Caja en cero para esta fecha</td></tr>`;
+                document.getElementById('report-results-total-row').setAttribute('hidden', true);
+                return;
+            }
+            
+            tbody.innerHTML = Object.keys(groups).map(k => `<tr class="border-b dark:border-gray-700"><td class="py-3 font-bold">${sanitizeHTML(k)}</td><td class="py-3 text-center text-gray-500">${groups[k].count} ops</td><td class="py-3 text-right text-accent font-bold">${formatter.format(groups[k].total)}</td></tr>`).join('');
+            
+            document.getElementById('report-total-transactions').textContent = `${salesCount} prendas`;
+            document.getElementById('report-grand-total').textContent = formatter.format(dailyTotal);
+            document.getElementById('report-results-total-row').removeAttribute('hidden');
+        }
+
+    </script>
+</body>
+</html>
