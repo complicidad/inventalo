@@ -95,7 +95,7 @@
                 <div>
                     <label class="block text-sm font-semibold mb-2">PIN de Acceso</label>
                     <input type="password" id="login-password" required class="block w-full px-4 py-3 text-center tracking-widest font-mono bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-brand-accent/20 focus:border-brand-accent dark:bg-gray-900 dark:border-gray-700 dark:text-white" placeholder="••••••••">
-                    <p class="text-xs text-center text-gray-400 mt-2">Usa 123456 por defecto. Migrar validación al backend para prod real.</p>
+                    <p class="text-xs text-center text-gray-400 mt-2">Usa 123456 por defecto.</p>
                 </div>
                 <button type="submit" id="login-submit-btn" class="w-full py-3.5 font-bold rounded-2xl text-white bg-gradient-to-r from-accent to-accent-alt hover:opacity-90 shadow-md transition-all flex justify-center items-center">
                     <span>Ingresar</span> <i data-feather="arrow-right" class="ml-2 w-4 h-4"></i>
@@ -137,6 +137,7 @@
             </nav>
         </div>
 
+        <!-- PANEL VENTAS -->
         <div id="sales-panel" class="tab-panel">
             <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
                 <!-- Formulario Nueva Venta -->
@@ -240,6 +241,7 @@
             </div>
         </div>
 
+        <!-- PANEL PRODUCTOS -->
         <div id="products-panel" class="tab-panel" hidden>
              <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-grow">
                 <div class="lg:col-span-1 bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-subtle border dark:border-gray-700 h-fit">
@@ -279,6 +281,7 @@
             </div>
         </div>
 
+        <!-- PANEL LOGÍSTICA -->
         <div id="shipping-panel" class="tab-panel" hidden>
             <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 overflow-hidden flex flex-col h-full">
                 
@@ -329,6 +332,7 @@
             </div>
         </div>
 
+        <!-- PANEL GASTOS -->
         <div id="expenses-panel" class="tab-panel" hidden>
              <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <div class="lg:col-span-1 bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-subtle border dark:border-gray-700 h-fit">
@@ -367,39 +371,134 @@
             </div>
         </div>
         
+        <!-- PANEL REPORTES GERENCIALES -->
         <div id="reports-panel" class="tab-panel" hidden>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 p-6">
-                    <h3 class="text-lg font-bold mb-4">Ventas Mensuales</h3>
-                    <div class="h-64"><canvas id="salesChart"></canvas></div>
-                </div>
-                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 p-6">
-                    <h3 class="text-lg font-bold mb-4">Compras Mensuales (Egresos)</h3>
-                    <div class="h-64"><canvas id="purchasesChart"></canvas></div>
+            
+            <!-- Barra de Filtros -->
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-subtle border dark:border-gray-700 mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <h2 class="text-lg font-bold flex items-center gap-2"><i data-feather="briefcase" class="text-accent"></i> Panel Gerencial</h2>
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <select id="report-year-filter" class="w-full sm:w-auto px-4 py-2 bg-gray-50 border rounded-xl text-sm font-semibold dark:bg-gray-900 dark:border-gray-700 cursor-pointer text-gray-700 dark:text-gray-200"></select>
+                    <select id="report-month-filter" class="w-full sm:w-auto px-4 py-2 bg-gray-50 border rounded-xl text-sm font-semibold dark:bg-gray-900 dark:border-gray-700 cursor-pointer text-gray-700 dark:text-gray-200">
+                        <option value="all">Todo el Año</option>
+                        <option value="0">Enero</option>
+                        <option value="1">Febrero</option>
+                        <option value="2">Marzo</option>
+                        <option value="3">Abril</option>
+                        <option value="4">Mayo</option>
+                        <option value="5">Junio</option>
+                        <option value="6">Julio</option>
+                        <option value="7">Agosto</option>
+                        <option value="8">Septiembre</option>
+                        <option value="9">Octubre</option>
+                        <option value="10">Noviembre</option>
+                        <option value="11">Diciembre</option>
+                    </select>
                 </div>
             </div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 p-6 flex flex-col h-full">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-xl font-bold flex items-center gap-2"><i data-feather="pie-chart" class="text-accent-alt"></i> Cierre Diario</h2>
-                        <div class="flex gap-2 items-center">
-                            <span class="text-sm text-gray-500 font-semibold hidden sm:inline">Fecha:</span>
-                            <input type="date" id="report-date-filter" class="px-3 py-2 border rounded-xl text-sm cursor-pointer dark:bg-gray-900 dark:border-gray-700">
-                        </div>
+
+            <!-- Fila 1: KPIs Estratégicos -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <!-- Utilidad Neta + MoM -->
+                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 p-5 flex flex-col justify-between">
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex items-center gap-2 text-gray-500"><i data-feather="trending-up" class="w-4 h-4"></i> <h3 class="text-sm font-bold uppercase">Utilidad Neta</h3></div>
+                        <span id="kpi-mom-badge" class="hidden text-[10px] font-bold px-1.5 py-0.5 rounded bg-green-100 text-green-700 items-center gap-1"></span>
                     </div>
-                    <table class="min-w-full">
-                        <thead class="text-xs text-gray-500 text-left border-b dark:border-gray-700"><tr><th class="pb-2">Medio</th><th class="pb-2 text-center">Cant.</th><th class="pb-2 text-right">Total</th></tr></thead>
-                        <tbody id="report-results-tbody" class="text-sm"></tbody>
-                        <tfoot class="font-bold border-t dark:border-gray-700"><tr id="report-results-total-row" hidden><td class="pt-4">TOTAL VENTAS</td><td id="report-total-transactions" class="pt-4 text-center"></td><td id="report-grand-total" class="pt-4 text-right text-accent"></td></tr></tfoot>
-                    </table>
+                    <div class="text-2xl sm:text-3xl font-black text-emerald-500 truncate" id="kpi-utilidad" title="Ventas - Costo de Prendas - Gastos Operativos">S/ 0.00</div>
                 </div>
-                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 p-6 h-[400px] flex flex-col">
-                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><i data-feather="award" class="text-yellow-500"></i> Top Clientes</h2>
+                <!-- Margen -->
+                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 p-5 flex flex-col justify-between">
+                    <div class="flex items-center gap-2 text-gray-500 mb-2"><i data-feather="percent" class="w-4 h-4"></i> <h3 class="text-sm font-bold uppercase">Margen Promedio</h3></div>
+                    <div class="text-2xl sm:text-3xl font-black text-brand-accent truncate" id="kpi-margen">0%</div>
+                    <p class="text-xs text-gray-400 mt-1 font-medium">Salud del markup</p>
+                </div>
+                <!-- Ticket y UPT -->
+                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 p-5 flex flex-col justify-between">
+                    <div class="flex items-center gap-2 text-gray-500 mb-2"><i data-feather="shopping-bag" class="w-4 h-4"></i> <h3 class="text-sm font-bold uppercase">Ticket Promedio</h3></div>
+                    <div class="text-2xl sm:text-3xl font-black text-purple-500 truncate" id="kpi-ticket">S/ 0.00</div>
+                    <p class="text-xs text-purple-400 mt-1 font-bold" id="kpi-upt">0.0 prendas x ticket (UPT)</p>
+                </div>
+                <!-- Valor Inventario -->
+                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 p-5 flex flex-col justify-between relative group cursor-help">
+                    <div class="flex items-center gap-2 text-gray-500 mb-2"><i data-feather="layers" class="w-4 h-4"></i> <h3 class="text-sm font-bold uppercase">Capital en Stock</h3></div>
+                    <div class="text-2xl sm:text-3xl font-black text-blue-500 truncate" id="kpi-inventario">S/ 0.00</div>
+                    <div class="absolute right-3 top-3"><i data-feather="info" class="w-4 h-4 text-gray-300"></i></div>
+                    <div class="hidden group-hover:block absolute z-10 bottom-full mb-2 right-0 bg-gray-900 text-white text-xs rounded py-1 px-2 w-48 text-center shadow-lg">Valorizado en tiempo real (Costo x Stock). No le afecta el filtro de fecha.</div>
+                </div>
+            </div>
+
+            <!-- Fila 2: Finanzas (Flujo y Egresos) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 p-6 flex flex-col">
+                    <h3 class="text-lg font-bold mb-4">Flujo de Caja Anual (Ingresos vs Egresos Totales)</h3>
+                    <div class="h-64 w-full flex-grow"><canvas id="cashflowChart"></canvas></div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 p-6 flex flex-col">
+                    <h3 class="text-lg font-bold mb-4" title="Compras de Lotes + Gastos Operativos">Estructura de Egresos</h3>
+                    <div class="h-64 w-full flex-grow"><canvas id="expensesDonutChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Fila 3: Crecimiento y Operaciones -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 p-6 flex flex-col">
+                    <h3 class="text-lg font-bold mb-4">Crecimiento: Clientes Nuevos vs Recurrentes</h3>
+                    <div class="h-64 w-full flex-grow"><canvas id="customerTypeChart"></canvas></div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 p-6 flex flex-col">
+                    <h3 class="text-lg font-bold mb-4">Medios de Pago</h3>
+                    <div class="h-64 w-full flex-grow"><canvas id="paymentMethodsChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Fila 4: Rankings e Inventario Crítico -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <!-- Top Prendas (Rotación) -->
+                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 p-6 h-[350px] flex flex-col">
+                    <h2 class="text-base font-bold mb-4 flex items-center gap-2"><i data-feather="star" class="text-yellow-500 w-5 h-5"></i> Mayor Rotación</h2>
+                    <ul id="top-products-list" class="overflow-y-auto flex-grow space-y-2 scrollbar-hide"></ul>
+                </div>
+                
+                <!-- Top Clientes -->
+                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 p-6 h-[350px] flex flex-col">
+                    <h2 class="text-base font-bold mb-4 flex items-center gap-2"><i data-feather="award" class="text-accent w-5 h-5"></i> Top Clientes</h2>
                     <ul id="top-clients-list" class="overflow-y-auto flex-grow space-y-2 scrollbar-hide"></ul>
                 </div>
+
+                <!-- Acumuladores (Riesgo de Efectivo) -->
+                <div class="bg-red-50 dark:bg-red-900/10 rounded-3xl shadow-subtle border border-red-100 dark:border-red-900/30 p-6 h-[350px] flex flex-col relative">
+                    <h2 class="text-base font-bold mb-1 flex items-center gap-2 text-red-800 dark:text-red-300"><i data-feather="alert-octagon" class="text-red-500 w-4 h-4"></i> Acumuladores</h2>
+                    <p class="text-xs text-red-500 mb-4 font-medium">> 30 días con prendas guardadas</p>
+                    <ul id="accumulated-clients-list" class="overflow-y-auto flex-grow scrollbar-hide space-y-2"></ul>
+                </div>
+
+                <!-- Stock Inmovilizado / Saldos -->
+                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 p-6 h-[350px] flex flex-col">
+                    <h2 class="text-base font-bold mb-4 flex items-center gap-2"><i data-feather="clock" class="text-gray-500 w-4 h-4"></i> Inmovilizado / Saldos</h2>
+                    <ul id="dead-stock-list" class="overflow-y-auto flex-grow scrollbar-hide space-y-2"></ul>
+                </div>
             </div>
+
+            <!-- Fila 5: Cierre Diario -->
+            <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-subtle border dark:border-gray-700 p-6 flex flex-col max-w-2xl">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold flex items-center gap-2"><i data-feather="pie-chart" class="text-accent-alt"></i> Cierre Diario</h2>
+                    <div class="flex gap-2 items-center">
+                        <span class="text-sm text-gray-500 font-semibold hidden sm:inline">Fecha:</span>
+                        <input type="date" id="report-date-filter" class="px-3 py-2 border rounded-xl text-sm cursor-pointer dark:bg-gray-900 dark:border-gray-700">
+                    </div>
+                </div>
+                <table class="min-w-full">
+                    <thead class="text-xs text-gray-500 text-left border-b dark:border-gray-700"><tr><th class="pb-2">Medio</th><th class="pb-2 text-center">Cant.</th><th class="pb-2 text-right">Total</th></tr></thead>
+                    <tbody id="report-results-tbody" class="text-sm"></tbody>
+                    <tfoot class="font-bold border-t dark:border-gray-700"><tr id="report-results-total-row" hidden><td class="pt-4">TOTAL VENTAS</td><td id="report-total-transactions" class="pt-4 text-center"></td><td id="report-grand-total" class="pt-4 text-right text-accent"></td></tr></tfoot>
+                </table>
+            </div>
+
         </div>
 
+        <!-- PANEL CONFIGURACIÓN -->
         <div id="config-panel" class="tab-panel" hidden>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                  <!-- Configuración de Conexión -->
@@ -450,7 +549,7 @@
             <p id="confirm-message" class="text-sm text-gray-500 dark:text-gray-400 mb-6">Esta acción no se puede deshacer.</p>
             <div class="flex gap-3">
                 <button id="confirm-cancel-btn" class="flex-1 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-white font-bold rounded-xl transition-colors">Cancelar</button>
-                <button id="confirm-ok-btn" class="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl shadow-md transition-colors">Eliminar</button>
+                <button id="confirm-ok-btn" class="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl shadow-md transition-colors">Confirmar</button>
             </div>
         </div>
     </div>
@@ -493,7 +592,7 @@
         const toProperCase = (str) => String(str || '').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
         const normalizeStr = (str) => String(str || '').toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-        // Función de saneamiento para evitar XSS (Cross-Site Scripting)
+        // Saneamiento XSS
         const sanitizeHTML = (str) => {
             if (!str) return '';
             return String(str).replace(/[&<>"']/g, function(m) {
@@ -520,7 +619,6 @@
                 let icon = type === 'success' ? '<i data-feather="check-circle" class="text-green-500"></i>' : '<i data-feather="alert-circle" class="text-red-500"></i>';
                 let border = type === 'success' ? 'border-green-500' : 'border-red-500';
                 toast.className = `bg-white dark:bg-gray-800 border-l-4 ${border} p-4 rounded-xl shadow-lg toast-enter flex items-start gap-3`;
-                // Se sanea el mensaje para evitar inyección en toasts
                 toast.innerHTML = `<div class="mt-0.5">${icon}</div><div><h4 class="text-sm font-bold">${sanitizeHTML(title)}</h4><p class="text-xs text-gray-500 mt-1">${sanitizeHTML(message)}</p></div>`;
                 container.appendChild(toast);
                 if (typeof feather !== 'undefined') feather.replace();
@@ -545,7 +643,6 @@
             UI.closeConfirm();
         });
 
-        // Funciones de Paginación Universal
         window.changePage = function(table, delta) {
             pageState[table].current += delta;
             if(table === 'sales') renderSalesTable();
@@ -590,7 +687,6 @@
         // ==========================================
         async function fetchGAS(action, payload = {}) {
             if (!GAS_WEB_APP_URL) throw new Error("Falta configurar URL de Apps Script. Ve a la pestaña 'Ajustes'.");
-            
             try {
                 const response = await fetch(GAS_WEB_APP_URL, {
                     method: 'POST', mode: 'cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -601,7 +697,6 @@
                 if (!result.success) throw new Error(result.error || "Error de Servidor");
                 return result.data;
             } catch (error) { 
-                console.error(error);
                 throw new Error(error.message.includes("Falta configurar") ? error.message : "Error de red o CORS. Revisa que el Apps Script esté implementado para 'Cualquier usuario'."); 
             }
         }
@@ -620,15 +715,10 @@
                 rawSales.forEach(item => {
                     if(!salesMap[item.saleId]) {
                         salesMap[item.saleId] = {
-                            id: item.saleId,
-                            clientName: item.clientName,
-                            clientPhone: item.clientPhone,
-                            date: cleanDate(item.date),
-                            medioDePago: item.medioDePago,
-                            total: 0,
+                            id: item.saleId, clientName: item.clientName, clientPhone: item.clientPhone,
+                            date: cleanDate(item.date), medioDePago: item.medioDePago, total: 0,
                             enviado: item.enviado === true || item.enviado === 'true' || item.enviado === 'TRUE',
-                            fechaEnvio: cleanDate(item.fechaEnvio),
-                            items: []
+                            fechaEnvio: cleanDate(item.fechaEnvio), items: []
                         };
                     }
                     salesMap[item.saleId].total += Number(item.total || 0);
@@ -637,11 +727,13 @@
                 
                 AppState.sales = Object.values(salesMap);
                 UI.showToast("Sincronizado", "Los registros están actualizados.");
+                
+                populateReportFilters();
                 refreshAllViews(); 
             } catch (e) {
                 UI.showToast("Error de Sistema", e.message, "error");
             } finally {
-                UI.hideModal(); // Garantizar que el modal SIEMPRE se cierre, incluso si hay error
+                UI.hideModal(); 
             }
         }
 
@@ -650,16 +742,13 @@
             renderProductsTable();
             renderExpensesTable();
             renderLogistics(); 
-            renderCharts();
-            renderTopClients();
+            renderCharts(); 
             if(document.getElementById('report-date-filter').value) renderDailyClose();
         }
 
         // ==========================================
         // INIT & EVENT DELEGATION
         // ==========================================
-        
-        // Uso de Event Delegation para manejar botones generados dinámicamente
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('button[data-action]');
             if (!btn) return;
@@ -673,6 +762,7 @@
             if (action === 'view-history') showProductHistory(id);
             if (action === 'delete-history') triggerDeleteHistory(id, extra);
             if (action === 'delete-expense') triggerDeleteExpense(id);
+            if (action === 'duplicate-expense') duplicateExpense(id); // <--- BOTON DUPLICAR AQUI
             if (action === 'copy-shipment') copyShipment(decodeURIComponent(extra));
         });
 
@@ -680,13 +770,11 @@
             e.preventDefault();
             const btn = document.getElementById('login-submit-btn');
             
-            // Simular petición asíncrona al backend para validar Auth
             btn.innerHTML = `<i data-feather="loader" class="w-5 h-5 animate-spin mx-auto text-white"></i>`;
             if (typeof feather !== 'undefined') feather.replace();
             btn.disabled = true;
 
             setTimeout(() => {
-                // Validación Simple: A futuro debe moverse a Apps Script
                 if (document.getElementById('login-password').value === "123456") { 
                     document.getElementById('auth-container').classList.add('hidden');
                     document.getElementById('main-app').classList.remove('hidden');
@@ -699,11 +787,7 @@
                         if(document.getElementById(id)) document.getElementById(id).value = today;
                     });
                     
-                    if(GAS_WEB_APP_URL) {
-                        syncData();
-                    } else {
-                        UI.showToast("Atención", "No olvides configurar tu URL en Ajustes", "error");
-                    }
+                    if(GAS_WEB_APP_URL) syncData(); else UI.showToast("Atención", "No olvides configurar tu URL en Ajustes", "error");
                 } else {
                     btn.innerHTML = `<span>Ingresar</span> <i data-feather="arrow-right" class="ml-2 w-4 h-4"></i>`;
                     if (typeof feather !== 'undefined') feather.replace();
@@ -711,322 +795,6 @@
                     UI.showToast("Acceso Denegado", "PIN incorrecto.", "error");
                 }
             }, 800);
-        });
-
-        // Configuración Apps Script Block
-        const GAS_CODE_TEMPLATE = `// ==========================================
-// BACKEND NoSQL - GOOGLE APPSCRIPT
-// ARQUITECTURA: COLUMNA A (ID), COLUMNA B (JSON)
-// ==========================================
-
-const SHEETS = {
-  CLIENTES: 'Clientes',
-  PRODUCTOS: 'Productos',
-  VENTAS: 'Ventas',
-  GASTOS: 'Gastos' 
-};
-
-function doPost(e) {
-  try {
-    const params = JSON.parse(e.postData.contents);
-    const action = params.action;
-    const payload = params.payload;
-    let result = {};
-    
-    switch (action) {
-      case 'getData': result = getAllData(); break;
-      case 'saveSale': result = saveSale(payload); break;
-      case 'saveProduct': result = saveProduct(payload); break;
-      case 'deleteProduct': result = deleteProduct(payload.id); break;
-      case 'deleteSaleItem': result = deleteSaleItem(payload.id); break;
-      case 'updateShippingMasive': result = updateShippingMasive(payload.itemsIds, payload.fechaEnvio); break;
-      case 'deletePurchaseHistory': result = deletePurchaseHistory(payload.productId, payload.historyIndex); break;
-      case 'saveExpense': result = saveExpense(payload); break;
-      case 'deleteExpense': result = deleteExpense(payload.id); break;
-      default: throw new Error('Acción no reconocida');
-    }
-    
-    return ContentService.createTextOutput(JSON.stringify({ success: true, data: result }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({ success: false, error: error.message }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-function doGet(e) {
-  return ContentService.createTextOutput("🚀 Backend Activo en Modo NoSQL (2 Columnas).").setMimeType(ContentService.MimeType.TEXT);
-}
-
-// -------------------------------------------------------------------
-// FUNCIÓN CENTRAL: LECTURA EN 2 COLUMNAS
-// -------------------------------------------------------------------
-function getSheetData(sheetName) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
-  if (!sheet) return [];
-  const data = sheet.getDataRange().getValues();
-  if (data.length <= 1) return []; 
-  
-  const rows = [];
-  for (let i = 1; i < data.length; i++) {
-    if (!data[i][0]) continue; 
-    let obj = {};
-    try { obj = JSON.parse(data[i][1] || '{}'); } catch(e) {}
-    obj.id = data[i][0];
-    obj._rowIndex = i + 1; 
-    rows.push(obj);
-  }
-  return rows;
-}
-
-function getAllData() {
-  return {
-    clients: getSheetData(SHEETS.CLIENTES),
-    products: getSheetData(SHEETS.PRODUCTOS),
-    sales: getSheetData(SHEETS.VENTAS),
-    expenses: getSheetData(SHEETS.GASTOS)
-  };
-}
-
-// -------------------------------------------------------------------
-// GASTOS (NUEVO)
-// -------------------------------------------------------------------
-function saveExpense(data) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEETS.GASTOS);
-  const newId = Utilities.getUuid();
-  sheet.appendRow([newId, JSON.stringify(data)]);
-  return { id: newId };
-}
-
-function deleteExpense(id) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEETS.GASTOS);
-  const data = sheet.getDataRange().getValues();
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][0] === id) {
-      sheet.deleteRow(i + 1);
-      return { success: true };
-    }
-  }
-  throw new Error("Gasto no encontrado");
-}
-
-// -------------------------------------------------------------------
-// BORRAR ITEM DEL HISTORIAL DE INVENTARIO
-// -------------------------------------------------------------------
-function deletePurchaseHistory(productId, index) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEETS.PRODUCTOS);
-  const products = getSheetData(SHEETS.PRODUCTOS);
-  
-  const pIndex = products.findIndex(p => p.id === productId);
-  if (pIndex >= 0) {
-    const p = products[pIndex];
-    let history = p.history || [];
-    
-    if (index >= 0 && index < history.length) {
-      const removedLote = history.splice(index, 1)[0];
-      p.stock = (Number(p.stock) || 0) - (Number(removedLote.qty) || 0);
-      if (p.stock < 0) p.stock = 0;
-      
-      p.history = history;
-      
-      const rowIndex = p._rowIndex;
-      delete p.id;
-      delete p._rowIndex;
-      
-      sheet.getRange(rowIndex, 2).setValue(JSON.stringify(p));
-      return { success: true };
-    }
-  }
-  throw new Error("Producto o historial no encontrado");
-}
-
-// -------------------------------------------------------------------
-// GUARDAR PRODUCTO EN JSON
-// -------------------------------------------------------------------
-function saveProduct(data) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEETS.PRODUCTOS);
-  const products = getSheetData(SHEETS.PRODUCTOS);
-  
-  const existingProduct = products.find(p => p.name.toLowerCase() === data.name.toLowerCase());
-  const newHistoryEntry = { date: data.date, qty: data.stockToAdd, cost: data.cost };
-  
-  if (existingProduct) {
-    const oldStock = Number(existingProduct.stock) || 0;
-    const oldCost = Number(existingProduct.cost) || 0; 
-    const newTotalStock = oldStock + Number(data.stockToAdd);
-    
-    const oldTotalValue = oldStock * oldCost;
-    const newAverageCost = (oldTotalValue + Number(data.cost)) / newTotalStock;
-    
-    let history = existingProduct.history || [];
-    history.push(newHistoryEntry);
-    
-    existingProduct.stock = newTotalStock;
-    existingProduct.cost = newAverageCost;
-    existingProduct.history = history;
-    
-    const rowToUpdate = existingProduct._rowIndex;
-    delete existingProduct.id;
-    delete existingProduct._rowIndex;
-    
-    sheet.getRange(rowToUpdate, 2).setValue(JSON.stringify(existingProduct));
-    return { id: rowToUpdate, action: 'updated' };
-  } else {
-    const newId = Utilities.getUuid();
-    const unitCost = data.cost / data.stockToAdd;
-    const newProductObj = {
-      name: data.name,
-      stock: data.stockToAdd,
-      cost: unitCost,
-      purchaseDate: data.date,
-      history: [newHistoryEntry]
-    };
-    sheet.appendRow([newId, JSON.stringify(newProductObj)]);
-    return { id: newId, action: 'created' };
-  }
-}
-
-// -------------------------------------------------------------------
-// GUARDAR VENTA
-// -------------------------------------------------------------------
-function saveSale(data) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const salesSheet = ss.getSheetByName(SHEETS.VENTAS);
-  const clientsSheet = ss.getSheetByName(SHEETS.CLIENTES);
-  const productsSheet = ss.getSheetByName(SHEETS.PRODUCTOS);
-  
-  let clientId = data.clientId;
-  
-  if (!clientId) {
-    const clientsData = getSheetData(SHEETS.CLIENTES);
-    const existingClient = clientsData.find(c => String(c.phone) === String(data.clientPhone));
-    
-    if (existingClient) {
-      clientId = existingClient.id;
-    } else {
-      clientId = Utilities.getUuid();
-      clientsSheet.appendRow([clientId, JSON.stringify({ phone: data.clientPhone, name: data.clientName })]);
-    }
-  }
-  
-  const saleId = Utilities.getUuid(); 
-  const products = getSheetData(SHEETS.PRODUCTOS);
-  
-  data.items.forEach(item => {
-    const itemId = Utilities.getUuid(); 
-    const itemObj = {
-      saleId: saleId, clientId: clientId, clientPhone: data.clientPhone, date: data.date, medioDePago: data.medioDePago,
-      productId: item.productId, desc: item.desc, qty: item.qty, price: item.price, total: item.total,
-      totalCosto: item.totalCosto, color: item.color, talla: item.talla, enviado: false, fechaEnvio: ''
-    };
-    salesSheet.appendRow([itemId, JSON.stringify(itemObj)]);
-    
-    const pIndex = products.findIndex(p => p.id === item.productId);
-    if (pIndex >= 0) products[pIndex].stock = (Number(products[pIndex].stock) || 0) - item.qty;
-  });
-  
-  products.forEach(p => {
-    if (p._rowIndex) {
-        const rowIndex = p._rowIndex;
-        const pCopy = {...p};
-        delete pCopy.id;
-        delete pCopy._rowIndex;
-        productsSheet.getRange(rowIndex, 2).setValue(JSON.stringify(pCopy));
-    }
-  });
-  return { saleId: saleId };
-}
-
-// -------------------------------------------------------------------
-// ELIMINAR ITEM DE VENTA
-// -------------------------------------------------------------------
-function deleteSaleItem(itemId) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const salesSheet = ss.getSheetByName(SHEETS.VENTAS);
-  const data = salesSheet.getDataRange().getValues();
-  
-  let deleteRowIndex = -1;
-  let itemObj = null;
-  
-  for (let i = 1; i < data.length; i++) {
-    if(data[i][0] === itemId) {
-      deleteRowIndex = i + 1;
-      try { itemObj = JSON.parse(data[i][1]); } catch(e) {}
-      break;
-    }
-  }
-  
-  if (deleteRowIndex === -1 || !itemObj) throw new Error("Registro no encontrado.");
-  
-  if (itemObj.productId && itemObj.qty > 0) {
-    const productsSheet = ss.getSheetByName(SHEETS.PRODUCTOS);
-    const products = getSheetData(SHEETS.PRODUCTOS); 
-    const pIndex = products.findIndex(p => p.id === itemObj.productId);
-    if (pIndex >= 0) {
-      const p = products[pIndex];
-      p.stock = (Number(p.stock) || 0) + itemObj.qty;
-      const rowIndex = p._rowIndex;
-      const pCopy = {...p};
-      delete pCopy.id;
-      delete pCopy._rowIndex;
-      productsSheet.getRange(rowIndex, 2).setValue(JSON.stringify(pCopy));
-    }
-  }
-  
-  salesSheet.deleteRow(deleteRowIndex);
-  return { success: true };
-}
-
-// -------------------------------------------------------------------
-// ACTUALIZAR ENVÍO MASIVO
-// -------------------------------------------------------------------
-function updateShippingMasive(itemsIds, fechaEnvio) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEETS.VENTAS);
-  const data = sheet.getDataRange().getValues(); 
-  
-  for (let i = 1; i < data.length; i++) {
-    if(!data[i][0]) continue;
-    let itemObj;
-    try { itemObj = JSON.parse(data[i][1]); } catch(e) { continue; }
-    
-    if (itemsIds.includes(data[i][0])) {
-      itemObj.enviado = true;
-      itemObj.fechaEnvio = fechaEnvio;
-      sheet.getRange(i + 1, 2).setValue(JSON.stringify(itemObj));
-    }
-  }
-  return { success: true };
-}
-
-// -------------------------------------------------------------------
-// ELIMINAR PRODUCTO (Definitivo)
-// -------------------------------------------------------------------
-function deleteProduct(productId) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEETS.PRODUCTOS);
-  const data = sheet.getDataRange().getValues();
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][0] === productId) {
-      sheet.deleteRow(i + 1);
-      return { success: true };
-    }
-  }
-  throw new Error("Producto no encontrado");
-}`;
-
-        document.getElementById('gas-code-block').value = GAS_CODE_TEMPLATE;
-
-        window.copyGasCode = function() {
-            const ta = document.getElementById('gas-code-block');
-            ta.select();
-            document.execCommand('copy');
-            UI.showToast("Copiado", "Código copiado al portapapeles.");
-        }
-
-        document.getElementById('config-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            GAS_WEB_APP_URL = document.getElementById('config-gas-url').value.trim();
-            localStorage.setItem('latam5s_gas_url', GAS_WEB_APP_URL);
-            UI.showToast("Guardado", "La URL de Apps Script se ha guardado localmente.");
         });
 
         document.getElementById('btn-sync-now').addEventListener('click', syncData);
@@ -1043,7 +811,7 @@ function deleteProduct(productId) {
                 document.querySelectorAll('.tab-panel').forEach(p => p.setAttribute('hidden', true));
                 tab.classList.add('bg-white', 'dark:bg-gray-700', 'text-brand-accent', 'shadow');
                 document.getElementById(tab.getAttribute('data-tab') + '-panel').removeAttribute('hidden');
-                if(tab.getAttribute('data-tab') === 'reports') { renderCharts(); renderTopClients(); }
+                if(tab.getAttribute('data-tab') === 'reports') { renderCharts(); }
             });
         });
 
@@ -1112,26 +880,11 @@ function deleteProduct(productId) {
         // LÓGICA DE VENTAS
         // ==========================================
         function renderCart() {
-            const list = document.getElementById('current-sale-items');
-            let total = 0;
-            
-            // Renderizado en memoria (cero lag)
-            const html = AppState.cart.map((item, idx) => {
+            const list = document.getElementById('current-sale-items'); let total = 0;
+            list.innerHTML = AppState.cart.map((item, idx) => {
                 total += item.total;
-                return `
-                    <li class="flex justify-between items-center p-2 border rounded-lg mb-2 dark:border-gray-700">
-                        <div>
-                            <span class="font-bold">${item.qty}x ${sanitizeHTML(toProperCase(item.desc))}</span>
-                            <span class="text-xs text-gray-500 block">${sanitizeHTML(item.color)} ${sanitizeHTML(item.talla)}</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="font-bold text-brand-accent">S/ ${item.total.toFixed(2)}</span>
-                            <button type="button" onclick="AppState.cart.splice(${idx}, 1); renderCart()" class="text-red-500"><i data-feather="trash-2" class="w-4 h-4"></i></button>
-                        </div>
-                    </li>`;
+                return `<li class="flex justify-between items-center p-2 border rounded-lg mb-2 dark:border-gray-700"><div><span class="font-bold">${item.qty}x ${sanitizeHTML(toProperCase(item.desc))}</span><span class="text-xs text-gray-500 block">${sanitizeHTML(item.color)} ${sanitizeHTML(item.talla)}</span></div><div class="flex items-center gap-3"><span class="font-bold text-brand-accent">S/ ${item.total.toFixed(2)}</span><button type="button" onclick="AppState.cart.splice(${idx}, 1); renderCart()" class="text-red-500"><i data-feather="trash-2" class="w-4 h-4"></i></button></div></li>`;
             }).join('');
-            
-            list.innerHTML = html;
             document.getElementById('current-sale-total').textContent = total.toFixed(2);
             document.getElementById('item-count-badge').textContent = AppState.cart.length + " items";
             if (typeof feather !== 'undefined') feather.replace();
@@ -1149,8 +902,7 @@ function deleteProduct(productId) {
             AppState.cart.push({
                 productId, desc, qty, price: total / qty, total: total,
                 costo: p.cost, totalCosto: p.cost * qty,
-                color: normalizeStr(document.getElementById('sale-item-color').value),
-                talla: normalizeStr(document.getElementById('sale-item-talla').value)
+                color: normalizeStr(document.getElementById('sale-item-color').value), talla: normalizeStr(document.getElementById('sale-item-talla').value)
             });
             
             ['sale-product-search', 'sale-product-id', 'sale-item-price', 'sale-item-color', 'sale-item-talla'].forEach(id => document.getElementById(id).value = '');
@@ -1166,47 +918,26 @@ function deleteProduct(productId) {
             if (!phone) return UI.showToast("Falta Cliente", "Agrega el teléfono.", "error");
 
             let cid = document.getElementById('sale-client-id')?.value || '';
-            if (!cid) {
-                const existingClient = AppState.clients.find(c => String(c.phone) === String(phone));
-                if (existingClient) cid = existingClient.id;
-            }
+            if (!cid) { const existingClient = AppState.clients.find(c => String(c.phone) === String(phone)); if (existingClient) cid = existingClient.id; }
 
-            const payload = {
-                clientId: cid, clientPhone: phone, clientName: phone,
-                date: document.getElementById('sale-date').value,
-                medioDePago: document.getElementById('sale-payment-method').value,
-                items: AppState.cart 
-            };
+            const payload = { clientId: cid, clientPhone: phone, clientName: phone, date: document.getElementById('sale-date').value, medioDePago: document.getElementById('sale-payment-method').value, items: AppState.cart };
 
             UI.showModal("Guardando...", "Escribiendo en base remota...");
             try {
-                await fetchGAS('saveSale', payload);
-                AppState.cart = []; renderCart();
-                document.getElementById('add-sale-form').reset();
-                if(document.getElementById('sale-client-id')) document.getElementById('sale-client-id').value = '';
-                document.getElementById('sale-date').value = new Date().toISOString().split('T')[0];
-                await syncData();
-                UI.showToast("Excelente", "Venta procesada exitosamente.");
-            } catch (err) {  
-                UI.showToast("Error", err.message, "error"); 
-            } finally {
-                UI.hideModal();
-            }
+                await fetchGAS('saveSale', payload); AppState.cart = []; renderCart(); document.getElementById('add-sale-form').reset();
+                if(document.getElementById('sale-client-id')) document.getElementById('sale-client-id').value = ''; document.getElementById('sale-date').value = new Date().toISOString().split('T')[0];
+                await syncData(); UI.showToast("Excelente", "Venta procesada exitosamente.");
+            } catch (err) { UI.showToast("Error", err.message, "error"); } finally { UI.hideModal(); }
         });
 
-        // Búsqueda y Paginación Ventas
         document.getElementById('client-sales-filter-search').addEventListener('input', debounce(() => { pageState.sales.current = 1; renderSalesTable(); }, 300));
         document.getElementById('product-sales-filter-search').addEventListener('input', debounce(() => { pageState.sales.current = 1; renderSalesTable(); }, 300));
         document.getElementById('date-sales-filter').addEventListener('change', () => { pageState.sales.current = 1; renderSalesTable(); });
         document.getElementById('pending-sales-filter-toggle').addEventListener('change', () => { pageState.sales.current = 1; renderSalesTable(); });
 
         function renderSalesTable() {
-            const tbody = document.getElementById('sales-list'); 
-            
-            const showPendingOnly = document.getElementById('pending-sales-filter-toggle').checked;
-            const clientQuery = document.getElementById('client-sales-filter-search').value.toLowerCase();
-            const productQuery = document.getElementById('product-sales-filter-search').value.toLowerCase();
-            const dateQuery = document.getElementById('date-sales-filter').value;
+            const tbody = document.getElementById('sales-list'); const showPendingOnly = document.getElementById('pending-sales-filter-toggle').checked;
+            const clientQuery = document.getElementById('client-sales-filter-search').value.toLowerCase(); const productQuery = document.getElementById('product-sales-filter-search').value.toLowerCase(); const dateQuery = document.getElementById('date-sales-filter').value;
             
             let allItems = [];
             AppState.sales.forEach(sale => {
@@ -1218,45 +949,23 @@ function deleteProduct(productId) {
                     allItems.push(item);
                 });
             });
-            
             allItems.sort((a,b) => new Date(b.date) - new Date(a.date));
 
-            const totalItems = allItems.length;
-            const startIndex = (pageState.sales.current - 1) * pageState.sales.size;
-            const paginatedItems = allItems.slice(startIndex, startIndex + pageState.sales.size);
+            const totalItems = allItems.length; const startIndex = (pageState.sales.current - 1) * pageState.sales.size; const paginatedItems = allItems.slice(startIndex, startIndex + pageState.sales.size);
 
             tbody.innerHTML = paginatedItems.map(item => {
                 let productHtml = `<span class="font-bold text-xs">${item.qty}x ${sanitizeHTML(toProperCase(item.desc))}</span>`;
                 if (item.color || item.talla) productHtml += `<br><span class="text-[10px] text-gray-500">${sanitizeHTML(item.color) || ''} ${sanitizeHTML(item.talla) || ''}</span>`;
-                
                 const status = item.enviado ? `<span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">Enviado</span>` : `<span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs font-bold">Pendiente</span>`;
-
-                return `
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 text-sm">
-                        <td class="px-4 py-3"><strong>${sanitizeHTML(item.clientPhone)}</strong><br><span class="text-xs text-gray-500">${sanitizeHTML(item.date)}</span></td>
-                        <td class="px-4 py-3 leading-tight">${productHtml}</td>
-                        <td class="px-4 py-3 text-right font-bold text-accent">${formatter.format(item.total)}<br><span class="text-[10px] text-gray-400 font-medium">${sanitizeHTML(item.medioDePago)}</span></td>
-                        <td class="px-4 py-3 text-center">${status}<br><span class="text-[10px] text-gray-400 mt-1 block">${sanitizeHTML(item.fechaEnvio) || ''}</span></td>
-                        <td class="px-4 py-3 text-right">
-                            <button data-action="delete-sale-item" data-id="${item.id}" title="Anular artículo" class="text-gray-400 hover:text-red-500 p-2 bg-gray-50 hover:bg-red-50 dark:bg-gray-800 rounded-lg transition-colors"><i data-feather="trash-2" class="w-4 h-4"></i></button>
-                        </td>
-                    </tr>`;
+                return `<tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 text-sm"><td class="px-4 py-3"><strong>${sanitizeHTML(item.clientPhone)}</strong><br><span class="text-xs text-gray-500">${sanitizeHTML(item.date)}</span></td><td class="px-4 py-3 leading-tight">${productHtml}</td><td class="px-4 py-3 text-right font-bold text-accent">${formatter.format(item.total)}<br><span class="text-[10px] text-gray-400 font-medium">${sanitizeHTML(item.medioDePago)}</span></td><td class="px-4 py-3 text-center">${status}<br><span class="text-[10px] text-gray-400 mt-1 block">${sanitizeHTML(item.fechaEnvio) || ''}</span></td><td class="px-4 py-3 text-right"><button data-action="delete-sale-item" data-id="${item.id}" title="Anular artículo" class="text-gray-400 hover:text-red-500 p-2 bg-gray-50 hover:bg-red-50 dark:bg-gray-800 rounded-lg transition-colors"><i data-feather="trash-2" class="w-4 h-4"></i></button></td></tr>`;
             }).join('');
-            
-            renderPagination('sales-pagination', 'sales', totalItems);
-            if(typeof feather !== 'undefined') feather.replace();
+            renderPagination('sales-pagination', 'sales', totalItems); if(typeof feather !== 'undefined') feather.replace();
         }
 
         function triggerDeleteSaleItem(itemId) {
             UI.confirm("¿Eliminar este artículo?", "Se anulará de la venta y se recuperará el stock.", async () => {
                 UI.showModal("Anulando...", "Restaurando inventario...");
-                try {
-                    await fetchGAS('deleteSaleItem', { id: itemId });
-                    await syncData();
-                    UI.showToast("Anulada", "Artículo removido.");
-                } catch(e) { 
-                    UI.showToast("Error", e.message, "error"); 
-                } finally { UI.hideModal(); }
+                try { await fetchGAS('deleteSaleItem', { id: itemId }); await syncData(); UI.showToast("Anulada", "Artículo removido."); } catch(e) { UI.showToast("Error", e.message, "error"); } finally { UI.hideModal(); }
             });
         }
 
@@ -1265,432 +974,516 @@ function deleteProduct(productId) {
         // ==========================================
         document.getElementById('add-product-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const payload = {
-                name: document.getElementById('product-search-inventory').value,
-                stockToAdd: parseInt(document.getElementById('product-stock').value),
-                cost: parseFloat(document.getElementById('product-cost').value),
-                date: document.getElementById('product-purchase-date').value
-            };
+            const payload = { name: document.getElementById('product-search-inventory').value, stockToAdd: parseInt(document.getElementById('product-stock').value), cost: parseFloat(document.getElementById('product-cost').value), date: document.getElementById('product-purchase-date').value };
             UI.showModal("Guardando...", "Registrando ingreso...");
-            try {
-                await fetchGAS('saveProduct', payload);
-                await syncData();
-                UI.showToast("Inventario Actualizado", "Producto listo.");
-                document.getElementById('add-product-form').reset();
-                document.getElementById('product-purchase-date').value = new Date().toISOString().split('T')[0];
-            } catch(e) { 
-                UI.showToast("Error", e.message, "error"); 
-            } finally { UI.hideModal(); }
+            try { await fetchGAS('saveProduct', payload); await syncData(); UI.showToast("Inventario Actualizado", "Producto listo."); document.getElementById('add-product-form').reset(); document.getElementById('product-purchase-date').value = new Date().toISOString().split('T')[0]; } catch(e) { UI.showToast("Error", e.message, "error"); } finally { UI.hideModal(); }
         });
 
         document.getElementById('product-directory-search').addEventListener('input', debounce(() => { pageState.products.current = 1; renderProductsTable(); }, 300));
 
         function renderProductsTable() {
-            const tbody = document.getElementById('products-list'); 
-            const query = document.getElementById('product-directory-search').value.toLowerCase();
-            
-            let filtered = AppState.products;
-            if(query) filtered = filtered.filter(p => String(p.name).toLowerCase().includes(query));
+            const tbody = document.getElementById('products-list'); const query = document.getElementById('product-directory-search').value.toLowerCase();
+            let filtered = AppState.products; if(query) filtered = filtered.filter(p => String(p.name).toLowerCase().includes(query));
+            const totalItems = filtered.length; const startIndex = (pageState.products.current - 1) * pageState.products.size; const paginatedItems = filtered.slice(startIndex, startIndex + pageState.products.size);
 
-            const totalItems = filtered.length;
-            const startIndex = (pageState.products.current - 1) * pageState.products.size;
-            const paginatedItems = filtered.slice(startIndex, startIndex + pageState.products.size);
-
-            tbody.innerHTML = paginatedItems.map(p => `
-                <tr class="text-sm border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                    <td class="px-6 py-3 font-bold">${sanitizeHTML(p.name)}</td>
-                    <td class="px-6 py-3 text-center"><span class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded font-bold">${p.stock}</span></td>
-                    <td class="px-6 py-3 text-right text-gray-500">${formatter.format(p.cost)}</td>
-                    <td class="px-6 py-3 text-center">
-                        <button data-action="view-history" data-id="${p.id}" title="Ver Historial" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-gray-800 p-1.5 rounded-lg mr-2 transition-colors"><i data-feather="clock" class="w-4 h-4"></i></button>
-                        <button data-action="delete-product" data-id="${p.id}" title="Borrar Producto" class="text-gray-400 hover:text-red-500 bg-gray-50 dark:bg-gray-800 p-1.5 rounded-lg transition-colors"><i data-feather="trash-2" class="w-4 h-4"></i></button>
-                    </td>
-                </tr>
-            `).join('');
-            
-            renderPagination('products-pagination', 'products', totalItems);
-            if(typeof feather !== 'undefined') feather.replace();
+            tbody.innerHTML = paginatedItems.map(p => `<tr class="text-sm border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"><td class="px-6 py-3 font-bold">${sanitizeHTML(p.name)}</td><td class="px-6 py-3 text-center"><span class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded font-bold">${p.stock}</span></td><td class="px-6 py-3 text-right text-gray-500">${formatter.format(p.cost)}</td><td class="px-6 py-3 text-center"><button data-action="view-history" data-id="${p.id}" title="Ver Historial" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-gray-800 p-1.5 rounded-lg mr-2 transition-colors"><i data-feather="clock" class="w-4 h-4"></i></button><button data-action="delete-product" data-id="${p.id}" title="Borrar Producto" class="text-gray-400 hover:text-red-500 bg-gray-50 dark:bg-gray-800 p-1.5 rounded-lg transition-colors"><i data-feather="trash-2" class="w-4 h-4"></i></button></td></tr>`).join('');
+            renderPagination('products-pagination', 'products', totalItems); if(typeof feather !== 'undefined') feather.replace();
         }
         
         function triggerDeleteProduct(id) {
             UI.confirm("¿Borrar Producto?", "Se eliminará de la base. Las ventas históricas se conservan.", async () => {
                 UI.showModal("Borrando...", "Eliminando de Sheets...");
-                try { 
-                    await fetchGAS('deleteProduct', { id }); 
-                    await syncData(); 
-                } catch(e) { UI.showToast("Error", e.message, "error"); } finally { UI.hideModal(); }
+                try { await fetchGAS('deleteProduct', { id }); await syncData(); } catch(e) { UI.showToast("Error", e.message, "error"); } finally { UI.hideModal(); }
             });
         }
 
         function showProductHistory(id) {
-            const p = AppState.products.find(x => x.id === id);
-            if(!p) return;
-            
-            document.getElementById('history-title').textContent = `Compras: ${sanitizeHTML(toProperCase(p.name))}`;
-            const list = document.getElementById('history-list');
-            const historyWithIndex = (p.history || []).map((h, i) => ({...h, originalIndex: i}));
-            
-            if(historyWithIndex.length === 0) {
-                list.innerHTML = '<li class="text-center text-gray-500 py-6">No hay historial.</li>';
-            } else {
+            const p = AppState.products.find(x => x.id === id); if(!p) return;
+            document.getElementById('history-title').textContent = `Compras: ${sanitizeHTML(toProperCase(p.name))}`; const list = document.getElementById('history-list'); const historyWithIndex = (p.history || []).map((h, i) => ({...h, originalIndex: i}));
+            if(historyWithIndex.length === 0) { list.innerHTML = '<li class="text-center text-gray-500 py-6">No hay historial.</li>'; } else {
                 list.innerHTML = historyWithIndex.sort((a,b) => new Date(b.date) - new Date(a.date)).map(h => {
                     const unitPrice = h.cost / h.qty;
-                    return `
-                        <li class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl flex justify-between items-center border border-gray-200 dark:border-gray-600">
-                            <div>
-                                <span class="font-bold text-sm block text-gray-900 dark:text-white">${sanitizeHTML(h.date)}</span>
-                                <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-1 block"><i data-feather="plus" class="w-3 h-3 inline"></i> ${h.qty} uds. agregadas</span>
-                            </div>
-                            <div class="text-right flex flex-col items-end">
-                                <span class="font-bold text-brand-accent text-lg">${formatter.format(h.cost)}</span>
-                                <div class="flex items-center gap-2 mt-1">
-                                    <span class="text-[10px] font-medium text-gray-400">${formatter.format(unitPrice)} c/u</span>
-                                    <button data-action="delete-history" data-id="${p.id}" data-extra="${h.originalIndex}" class="text-red-400 hover:text-red-600"><i data-feather="trash-2" class="w-3.5 h-3.5"></i></button>
-                                </div>
-                            </div>
-                        </li>`;
+                    return `<li class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl flex justify-between items-center border border-gray-200 dark:border-gray-600"><div><span class="font-bold text-sm block text-gray-900 dark:text-white">${sanitizeHTML(h.date)}</span><span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-1 block"><i data-feather="plus" class="w-3 h-3 inline"></i> ${h.qty} uds. agregadas</span></div><div class="text-right flex flex-col items-end"><span class="font-bold text-brand-accent text-lg">${formatter.format(h.cost)}</span><div class="flex items-center gap-2 mt-1"><span class="text-[10px] font-medium text-gray-400">${formatter.format(unitPrice)} c/u</span><button data-action="delete-history" data-id="${p.id}" data-extra="${h.originalIndex}" class="text-red-400 hover:text-red-600"><i data-feather="trash-2" class="w-3.5 h-3.5"></i></button></div></div></li>`;
                 }).join('');
             }
-            document.getElementById('history-modal').removeAttribute('hidden');
-            if(typeof feather !== 'undefined') feather.replace();
+            document.getElementById('history-modal').removeAttribute('hidden'); if(typeof feather !== 'undefined') feather.replace();
         }
 
         function triggerDeleteHistory(productId, historyIndex) {
             UI.confirm("¿Eliminar ingreso?", "Se restarán estas unidades del stock actual.", async () => {
                 UI.showModal("Actualizando...", "Restando stock...");
-                try {
-                    await fetchGAS('deletePurchaseHistory', { productId, historyIndex });
-                    await syncData();
-                    UI.showToast("Eliminado", "Historial actualizado.");
-                    showProductHistory(productId);
-                } catch(e) { UI.showToast("Error", e.message, "error"); } finally { UI.hideModal(); }
+                try { await fetchGAS('deletePurchaseHistory', { productId, historyIndex }); await syncData(); UI.showToast("Eliminado", "Historial actualizado."); showProductHistory(productId); } catch(e) { UI.showToast("Error", e.message, "error"); } finally { UI.hideModal(); }
             });
         }
 
         // ==========================================
-        // GASTOS
+        // GASTOS (Con botón duplicar)
         // ==========================================
         document.getElementById('add-expense-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const payload = {
-                desc: document.getElementById('expense-desc').value.trim(),
-                amount: parseFloat(document.getElementById('expense-amount').value),
-                date: document.getElementById('expense-date').value
-            };
+            const payload = { desc: document.getElementById('expense-desc').value.trim(), amount: parseFloat(document.getElementById('expense-amount').value), date: document.getElementById('expense-date').value };
             UI.showModal("Guardando...", "Registrando el gasto...");
-            try {
-                await fetchGAS('saveExpense', payload);
-                await syncData();
-                UI.showToast("Éxito", "Gasto guardado.");
-                document.getElementById('add-expense-form').reset();
-                document.getElementById('expense-date').value = new Date().toISOString().split('T')[0];
-            } catch(err) { UI.showToast("Error", err.message, "error"); } finally { UI.hideModal(); }
+            try { await fetchGAS('saveExpense', payload); await syncData(); UI.showToast("Éxito", "Gasto guardado."); document.getElementById('add-expense-form').reset(); document.getElementById('expense-date').value = new Date().toISOString().split('T')[0]; } catch(err) { UI.showToast("Error", err.message, "error"); } finally { UI.hideModal(); }
         });
 
         function renderExpensesTable() {
             const tbody = document.getElementById('expenses-list'); 
-            
-            if(AppState.expenses.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-400">No hay gastos.</td></tr>`;
-                document.getElementById('expenses-pagination').innerHTML = '';
-                return;
-            }
+            if(AppState.expenses.length === 0) { tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-400">No hay gastos.</td></tr>`; document.getElementById('expenses-pagination').innerHTML = ''; return; }
 
             const sortedExpenses = [...AppState.expenses].sort((a,b) => new Date(b.date) - new Date(a.date));
-            const totalItems = sortedExpenses.length;
-            const startIndex = (pageState.expenses.current - 1) * pageState.expenses.size;
-            const paginatedItems = sortedExpenses.slice(startIndex, startIndex + pageState.expenses.size);
+            const totalItems = sortedExpenses.length; const startIndex = (pageState.expenses.current - 1) * pageState.expenses.size; const paginatedItems = sortedExpenses.slice(startIndex, startIndex + pageState.expenses.size);
 
             tbody.innerHTML = paginatedItems.map(exp => `
                 <tr class="text-sm border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                     <td class="px-6 py-4 text-gray-500">${sanitizeHTML(exp.date)}</td>
                     <td class="px-6 py-4 font-bold">${sanitizeHTML(toProperCase(exp.desc))}</td>
                     <td class="px-6 py-4 text-right font-bold text-red-500">- ${formatter.format(exp.amount)}</td>
-                    <td class="px-6 py-4 text-center">
+                    <td class="px-6 py-4 text-center whitespace-nowrap">
+                        <button data-action="duplicate-expense" data-id="${exp.id}" title="Duplicar Gasto" class="text-blue-500 hover:text-blue-700 p-1.5 bg-blue-50 dark:bg-gray-800 rounded-lg mr-1 transition-colors"><i data-feather="copy" class="w-4 h-4"></i></button>
                         <button data-action="delete-expense" data-id="${exp.id}" class="text-gray-400 hover:text-red-500 p-1.5 rounded-lg"><i data-feather="trash-2" class="w-4 h-4"></i></button>
                     </td>
                 </tr>
             `).join('');
-            
-            renderPagination('expenses-pagination', 'expenses', totalItems);
-            if(typeof feather !== 'undefined') feather.replace();
+            renderPagination('expenses-pagination', 'expenses', totalItems); if(typeof feather !== 'undefined') feather.replace();
+        }
+
+        function duplicateExpense(id) {
+            const exp = AppState.expenses.find(e => e.id === id); if(!exp) return;
+            document.getElementById('expense-desc').value = exp.desc;
+            document.getElementById('expense-amount').value = exp.amount;
+            document.getElementById('expense-date').value = new Date().toISOString().split('T')[0];
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            UI.showToast("Copiado al Formulario", "Revisa los datos y presiona Guardar.");
         }
 
         function triggerDeleteExpense(id) {
             UI.confirm("¿Eliminar Gasto?", "Se eliminará permanentemente.", async () => {
                 UI.showModal("Eliminando", "Actualizando libros...");
-                try { 
-                    await fetchGAS('deleteExpense', { id }); 
-                    await syncData(); 
-                } catch(e) { UI.showToast("Error", e.message, "error"); } finally { UI.hideModal(); }
+                try { await fetchGAS('deleteExpense', { id }); await syncData(); } catch(e) { UI.showToast("Error", e.message, "error"); } finally { UI.hideModal(); }
             });
         }
 
         // ==========================================
         // LOGÍSTICA & EXCEL
         // ==========================================
-        document.getElementById('shipping-date-filter').addEventListener('change', () => {
-            AppState.uploadedShipments = []; 
-            document.getElementById('shipping-excel-upload').value = '';
-            document.getElementById('clear-excel-btn').classList.add('hidden');
-            pageState.logistics.current = 1;
-            renderLogistics();
-        });
+        document.getElementById('shipping-date-filter').addEventListener('change', () => { AppState.uploadedShipments = []; document.getElementById('shipping-excel-upload').value = ''; document.getElementById('clear-excel-btn').classList.add('hidden'); pageState.logistics.current = 1; renderLogistics(); });
 
         document.getElementById('shipping-excel-upload').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
+            const file = e.target.files[0]; if (!file) return; const reader = new FileReader();
             reader.onload = function(evt) {
                 try {
-                    const data = new Uint8Array(evt.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const json = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
-                    
+                    const data = new Uint8Array(evt.target.result); const workbook = XLSX.read(data, {type: 'array'}); const worksheet = workbook.Sheets[workbook.SheetNames[0]]; const json = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
                     AppState.uploadedShipments = json.map(row => {
                         const phoneRaw = row['Teléfono'] || row['Telefono'] || row['Tel'] || row['phone'] || Object.values(row)[3] || '';
                         const clientName = row['Cliente'] || row['Nombre'] || Object.values(row)[2] || '';
                         const courier = row['Courier'] || row['courier'] || Object.values(row)[1] || 'Sin Courier';
-                        
-                        return {
-                            phone: String(phoneRaw).replace(/\D/g, ''),
-                            name: clientName,
-                            courier: String(courier).trim(),
-                        };
+                        return { phone: String(phoneRaw).replace(/\D/g, ''), name: clientName, courier: String(courier).trim() };
                     }).filter(x => x.phone.length > 0);
-                    
-                    document.getElementById('shipping-date-filter').value = ''; 
-                    document.getElementById('clear-excel-btn').classList.remove('hidden');
-                    UI.showToast("Excel Cargado", `Se identificaron ${AppState.uploadedShipments.length} clientes.`);
-                    pageState.logistics.current = 1;
-                    renderLogistics();
-                } catch(err) {
-                    UI.showToast("Error Excel", "Formato no soportado.", "error");
-                }
-            };
-            reader.readAsArrayBuffer(file);
+                    document.getElementById('shipping-date-filter').value = ''; document.getElementById('clear-excel-btn').classList.remove('hidden'); UI.showToast("Excel Cargado", `Se identificaron ${AppState.uploadedShipments.length} clientes.`); pageState.logistics.current = 1; renderLogistics();
+                } catch(err) { UI.showToast("Error Excel", "Formato no soportado.", "error"); }
+            }; reader.readAsArrayBuffer(file);
         });
 
-        document.getElementById('clear-excel-btn').addEventListener('click', () => {
-            AppState.uploadedShipments = [];
-            document.getElementById('shipping-excel-upload').value = '';
-            document.getElementById('clear-excel-btn').classList.add('hidden');
-            pageState.logistics.current = 1;
-            renderLogistics();
-        });
+        document.getElementById('clear-excel-btn').addEventListener('click', () => { AppState.uploadedShipments = []; document.getElementById('shipping-excel-upload').value = ''; document.getElementById('clear-excel-btn').classList.add('hidden'); pageState.logistics.current = 1; renderLogistics(); });
 
         function renderLogistics() {
-            const date = document.getElementById('shipping-date-filter').value;
-            const tbody = document.getElementById('all-shipments-list'); 
-            const massShippingBar = document.getElementById('mass-shipping-bar');
-            
+            const date = document.getElementById('shipping-date-filter').value; const tbody = document.getElementById('all-shipments-list'); const massShippingBar = document.getElementById('mass-shipping-bar');
             let displayShipments = [];
 
             if (AppState.uploadedShipments && AppState.uploadedShipments.length > 0) {
                 massShippingBar.classList.remove('hidden');
                 AppState.uploadedShipments.forEach(ship => {
-                    let pendingItems = [];
-                    AppState.sales.forEach(sale => {
-                        sale.items.forEach(item => {
-                            if (!item.enviado && String(item.clientPhone).replace(/\D/g, '') === ship.phone) pendingItems.push(item);
-                        });
-                    });
-                    displayShipments.push({
-                        isExcel: true, clientPhone: ship.phone, clientName: ship.name, courier: ship.courier,
-                        items: pendingItems, totalItems: pendingItems.reduce((sum, item) => sum + Number(item.qty), 0),
-                        date: new Date().toISOString().split('T')[0]
-                    });
+                    let pendingItems = []; AppState.sales.forEach(sale => { sale.items.forEach(item => { if (!item.enviado && String(item.clientPhone).replace(/\D/g, '') === ship.phone) pendingItems.push(item); }); });
+                    displayShipments.push({ isExcel: true, clientPhone: ship.phone, clientName: ship.name, courier: ship.courier, items: pendingItems, totalItems: pendingItems.reduce((sum, item) => sum + Number(item.qty), 0), date: new Date().toISOString().split('T')[0] });
                 });
             } else if (date) {
-                massShippingBar.classList.add('hidden');
-                const shipmentsByClient = {};
+                massShippingBar.classList.add('hidden'); const shipmentsByClient = {};
                 AppState.sales.forEach(sale => {
                     sale.items.forEach(item => {
                         if(item.enviado && item.fechaEnvio === date) {
-                            if (!shipmentsByClient[item.clientPhone]) {
-                                shipmentsByClient[item.clientPhone] = { isExcel: false, clientPhone: item.clientPhone, clientName: sale.clientName || 'Cliente', courier: '-', date: date, items: [], totalItems: 0 };
-                            }
-                            shipmentsByClient[item.clientPhone].items.push(item);
-                            shipmentsByClient[item.clientPhone].totalItems += Number(item.qty);
+                            if (!shipmentsByClient[item.clientPhone]) { shipmentsByClient[item.clientPhone] = { isExcel: false, clientPhone: item.clientPhone, clientName: sale.clientName || 'Cliente', courier: '-', date: date, items: [], totalItems: 0 }; }
+                            shipmentsByClient[item.clientPhone].items.push(item); shipmentsByClient[item.clientPhone].totalItems += Number(item.qty);
                         }
                     });
-                });
-                displayShipments = Object.values(shipmentsByClient);
-            } else {
-                massShippingBar.classList.add('hidden');
-                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400">Seleccione fecha o cargue Excel para cruzar datos.</td></tr>`; 
-                document.getElementById('logistics-pagination').innerHTML = '';
-                return;
-            }
+                }); displayShipments = Object.values(shipmentsByClient);
+            } else { massShippingBar.classList.add('hidden'); tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400">Seleccione fecha o cargue Excel para cruzar datos.</td></tr>`; document.getElementById('logistics-pagination').innerHTML = ''; return; }
 
-            displayShipments.sort((a, b) => {
-                const cA = (a.courier || '').toLowerCase(); const cB = (b.courier || '').toLowerCase();
-                if (cA < cB) return -1; if (cA > cB) return 1; return b.totalItems - a.totalItems;
-            });
+            displayShipments.sort((a, b) => { const cA = (a.courier || '').toLowerCase(); const cB = (b.courier || '').toLowerCase(); if (cA < cB) return -1; if (cA > cB) return 1; return b.totalItems - a.totalItems; });
 
-            if (displayShipments.length === 0) { 
-                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-500">No hay despachos para mostrar.</td></tr>`; 
-                document.getElementById('logistics-pagination').innerHTML = '';
-                return; 
-            }
+            if (displayShipments.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-500">No hay despachos para mostrar.</td></tr>`; document.getElementById('logistics-pagination').innerHTML = ''; return; }
 
-            const totalItems = displayShipments.length;
-            const startIndex = (pageState.logistics.current - 1) * pageState.logistics.size;
-            const paginatedItems = displayShipments.slice(startIndex, startIndex + pageState.logistics.size);
+            const totalItems = displayShipments.length; const startIndex = (pageState.logistics.current - 1) * pageState.logistics.size; const paginatedItems = displayShipments.slice(startIndex, startIndex + pageState.logistics.size);
 
             tbody.innerHTML = paginatedItems.map(shipment => {
-                let detailLines = `<li class="text-xs py-1 text-gray-400 italic">No tiene prendas pendientes.</li>`;
-                let actionBtn = ''; let checkboxHtml = '';
-                
+                let detailLines = `<li class="text-xs py-1 text-gray-400 italic">No tiene prendas pendientes.</li>`; let actionBtn = ''; let checkboxHtml = '';
                 if (shipment.items.length > 0) {
                     detailLines = shipment.items.map(i => `<li class="text-xs py-1 border-b dark:border-gray-700"><strong>${i.qty}x ${sanitizeHTML(toProperCase(i.desc))}</strong> (${sanitizeHTML(i.color)} / ${sanitizeHTML(i.talla)})</li>`).join('');
-                    const shipmentData = { clientPhone: shipment.clientPhone, date: shipment.date, items: shipment.items };
-                    actionBtn = `<button data-action="copy-shipment" data-extra="${encodeURIComponent(JSON.stringify(shipmentData))}" class="p-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg text-gray-600 dark:text-white transition-colors"><i data-feather="copy" class="w-4 h-4"></i></button>`;
+                    const shipmentData = { clientPhone: shipment.clientPhone, date: shipment.date, items: shipment.items }; actionBtn = `<button data-action="copy-shipment" data-extra="${encodeURIComponent(JSON.stringify(shipmentData))}" class="p-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg text-gray-600 dark:text-white transition-colors"><i data-feather="copy" class="w-4 h-4"></i></button>`;
                     if (shipment.isExcel) checkboxHtml = `<input type="checkbox" class="shipping-checkbox rounded w-4 h-4 cursor-pointer" data-ids="${shipment.items.map(i => i.id).join(',')}">`;
                 }
-
-                return `
-                    <tr class="text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                        <td class="px-4 py-4 text-center">${checkboxHtml}</td>
-                        <td class="px-6 py-4 font-semibold text-gray-600 dark:text-gray-300">${sanitizeHTML(toProperCase(shipment.courier))}</td>
-                        <td class="px-6 py-4"><strong>${sanitizeHTML(toProperCase(shipment.clientName)) || 'Cliente'}</strong><br><span class="text-xs text-gray-500 font-mono">${sanitizeHTML(shipment.clientPhone)}</span></td>
-                        <td class="px-6 py-4"><ul>${detailLines}</ul></td>
-                        <td class="px-6 py-4 text-right">${actionBtn}</td>
-                    </tr>`;
+                return `<tr class="text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"><td class="px-4 py-4 text-center">${checkboxHtml}</td><td class="px-6 py-4 font-semibold text-gray-600 dark:text-gray-300">${sanitizeHTML(toProperCase(shipment.courier))}</td><td class="px-6 py-4"><strong>${sanitizeHTML(toProperCase(shipment.clientName)) || 'Cliente'}</strong><br><span class="text-xs text-gray-500 font-mono">${sanitizeHTML(shipment.clientPhone)}</span></td><td class="px-6 py-4"><ul>${detailLines}</ul></td><td class="px-6 py-4 text-right">${actionBtn}</td></tr>`;
             }).join('');
-            
-            renderPagination('logistics-pagination', 'logistics', totalItems);
-            if(typeof feather !== 'undefined') feather.replace();
+            renderPagination('logistics-pagination', 'logistics', totalItems); if(typeof feather !== 'undefined') feather.replace();
         }
 
-        document.getElementById('select-all-shipping-checkbox').addEventListener('change', (e) => {
-            document.querySelectorAll('.shipping-checkbox').forEach(cb => cb.checked = e.target.checked);
-        });
+        document.getElementById('select-all-shipping-checkbox').addEventListener('change', (e) => { document.querySelectorAll('.shipping-checkbox').forEach(cb => cb.checked = e.target.checked); });
 
         document.getElementById('mass-update-shipping-btn').addEventListener('click', async () => {
-            const date = document.getElementById('mass-shipping-date').value;
-            const checkedBoxes = Array.from(document.querySelectorAll('.shipping-checkbox:checked'));
-            let allItemsIds = [];
+            const date = document.getElementById('mass-shipping-date').value; const checkedBoxes = Array.from(document.querySelectorAll('.shipping-checkbox:checked')); let allItemsIds = [];
             checkedBoxes.forEach(cb => { if (cb.dataset.ids) allItemsIds = allItemsIds.concat(cb.dataset.ids.split(',')); });
-
             if(!date || !allItemsIds.length) return UI.showToast("Atención", "Elige fecha y marca clientes.", "error");
-            
             UI.showModal("Despachando...", `Actualizando ${allItemsIds.length} envíos...`);
-            try {
-                await fetchGAS('updateShippingMasive', { itemsIds: allItemsIds, fechaEnvio: date });
-                await syncData();
-                UI.showToast("Éxito", `Envíos procesados correctamente.`);
-                document.getElementById('select-all-shipping-checkbox').checked = false;
-            } catch(e) { UI.showToast("Error", e.message, "error"); } finally { UI.hideModal(); }
+            try { await fetchGAS('updateShippingMasive', { itemsIds: allItemsIds, fechaEnvio: date }); await syncData(); UI.showToast("Éxito", `Envíos procesados correctamente.`); document.getElementById('select-all-shipping-checkbox').checked = false; } catch(e) { UI.showToast("Error", e.message, "error"); } finally { UI.hideModal(); }
         });
 
         function copyShipment(saleEncoded) {
-            const sale = JSON.parse(saleEncoded);
-            let totalPrendas = 0; let txt = `*📦 DETALLE DE ENVÍO*\n\n*📅 Fecha:* ${sale.date}\n\n*🛍️ Compras incluidas:*\n\n`;
-            
-            sale.items.forEach(i => {
-                totalPrendas += Number(i.qty) || 0;
-                let itemDesc = `🌻 *${i.qty} x ${toProperCase(i.desc)}*`;
-                let attrs = [];
-                if (i.color) attrs.push(`color: ${i.color.toLowerCase()}`);
-                if (i.talla) attrs.push(`talla: ${i.talla}`);
-                if (attrs.length > 0) itemDesc += ` _(${attrs.join(', ')})_`;
-                txt += itemDesc + `\n\n`;
-            });
-            
+            const sale = JSON.parse(saleEncoded); let totalPrendas = 0; let txt = `*📦 DETALLE DE ENVÍO*\n\n*📅 Fecha:* ${sale.date}\n\n*🛍️ Compras incluidas:*\n\n`;
+            sale.items.forEach(i => { totalPrendas += Number(i.qty) || 0; let itemDesc = `🌻 *${i.qty} x ${toProperCase(i.desc)}*`; let attrs = []; if (i.color) attrs.push(`color: ${i.color.toLowerCase()}`); if (i.talla) attrs.push(`talla: ${i.talla}`); if (attrs.length > 0) itemDesc += ` _(${attrs.join(', ')})_`; txt += itemDesc + `\n\n`; });
             txt += `✅ *Total de prendas: ${totalPrendas}*\n\n_Atte. CompliCompras_`;
-            
-            const ta = document.createElement("textarea"); ta.value = txt; ta.style.position = "fixed"; document.body.appendChild(ta);
-            ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-            UI.showToast("Copiado", "Mensaje listo para WhatsApp.");
+            const ta = document.createElement("textarea"); ta.value = txt; ta.style.position = "fixed"; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); UI.showToast("Copiado", "Mensaje listo para WhatsApp.");
         }
 
         // ==========================================
-        // GRÁFICOS Y REPORTES
+        // GRÁFICOS Y REPORTES GERENCIALES
         // ==========================================
-        let salesChartInstance, purchasesChartInstance;
+        let cashflowChartInstance, expensesDonutChartInstance, customerTypeChartInstance, paymentMethodsChartInstance;
+
+        function populateReportFilters() {
+            const yearSet = new Set();
+            const currentYear = new Date().getFullYear();
+            yearSet.add(currentYear);
+            
+            AppState.sales.forEach(s => s.items.forEach(i => { if(i.date) yearSet.add(parseInt(i.date.split('-')[0])); }));
+            AppState.expenses.forEach(e => { if(e.date) yearSet.add(parseInt(e.date.split('-')[0])); });
+            
+            const yearSelect = document.getElementById('report-year-filter');
+            const currentVal = yearSelect.value || currentYear.toString();
+            
+            yearSelect.innerHTML = Array.from(yearSet).sort((a,b) => b - a).map(y => `<option value="${y}">Año ${y}</option>`).join('');
+            yearSelect.value = yearSet.has(parseInt(currentVal)) ? currentVal : currentYear.toString();
+        }
+
+        document.getElementById('report-year-filter').addEventListener('change', renderCharts);
+        document.getElementById('report-month-filter').addEventListener('change', renderCharts);
+        document.getElementById('report-date-filter').addEventListener('change', renderDailyClose);
 
         function renderCharts() { 
-            const currentYear = new Date().getFullYear();
-            const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-            
-            let salesData = new Array(12).fill(0);
-            let purchasesData = new Array(12).fill(0);
+            const yearSelectVal = document.getElementById('report-year-filter').value;
+            const monthSelectVal = document.getElementById('report-month-filter').value;
+            if(!yearSelectVal) return;
 
-            AppState.sales.forEach(sale => {
-                sale.items.forEach(item => {
-                    if (item.date) {
-                        const parts = item.date.split('-');
-                        if (parts.length === 3 && parseInt(parts[0]) === currentYear) salesData[parseInt(parts[1]) - 1] += Number(item.total) || 0;
+            const targetYear = parseInt(yearSelectVal);
+            const isAllYear = monthSelectVal === 'all';
+            const targetMonth = isAllYear ? null : parseInt(monthSelectVal);
+
+            // Determinar Periodo Anterior (Para MoM)
+            let prevYear = targetYear;
+            let prevMonth = targetMonth - 1;
+            if (prevMonth < 0) { prevMonth = 11; prevYear--; }
+            if (isAllYear) { prevYear = targetYear - 1; }
+
+            // Mapear Fecha de Primera Compra por Cliente (Nuevos vs Recurrentes)
+            const clientFirstPurchase = {};
+            AppState.sales.forEach(s => {
+                s.items.forEach(i => {
+                    if (i.date) {
+                        const dObj = new Date(i.date + 'T12:00:00');
+                        const phone = String(i.clientPhone).trim();
+                        if (!clientFirstPurchase[phone] || dObj < clientFirstPurchase[phone].dateObj) {
+                            clientFirstPurchase[phone] = { dateObj: dObj, monthKey: `${dObj.getFullYear()}-${dObj.getMonth()}` };
+                        }
                     }
                 });
             });
 
+            // Variables de Acumulación
+            let currRevenue = 0, currCOGS = 0, currOpex = 0, currTickets = new Set(), currUnits = 0;
+            let prevRevenue = 0, prevCOGS = 0, prevOpex = 0;
+
+            let cashflowSales = new Array(12).fill(0);
+            let cashflowExpenses = new Array(12).fill(0);
+            let customerNew = new Array(12).fill(0);
+            let customerRecurrent = new Array(12).fill(0);
+
+            let expenseCategories = { 'Mercadería (Costo)': 0 };
+            let paymentMethods = {};
+            let productTotals = new Map();
+            let clientTotals = new Map();
+
+            // Analizar Ventas
+            AppState.sales.forEach(sale => {
+                sale.items.forEach(item => {
+                    if (!item.date) return;
+                    const dObj = new Date(item.date + 'T12:00:00');
+                    const iYear = dObj.getFullYear();
+                    const iMonth = dObj.getMonth();
+
+                    const itemTotal = Number(item.total) || 0;
+                    const itemQty = Number(item.qty) || 0;
+
+                    // Fallback de costo para ventas antiguas
+                    let itemCost = Number(item.totalCosto) || ((Number(item.costo) || 0) * itemQty);
+                    if (!itemCost) {
+                        const p = AppState.products.find(x => x.id === item.productId);
+                        if (p) itemCost = (Number(p.cost) || 0) * itemQty;
+                    }
+
+                    const phone = String(item.clientPhone).trim();
+                    let isNew = false;
+                    if(clientFirstPurchase[phone]) {
+                        isNew = clientFirstPurchase[phone].monthKey === `${iYear}-${iMonth}`;
+                    }
+
+                    // Llenar Arrays Anuales
+                    if (iYear === targetYear) {
+                        cashflowSales[iMonth] += itemTotal;
+                        if(isNew) customerNew[iMonth] += itemTotal;
+                        else customerRecurrent[iMonth] += itemTotal;
+                    }
+
+                    // Periodo Actual
+                    const inCurrent = isAllYear ? (iYear === targetYear) : (iYear === targetYear && iMonth === targetMonth);
+                    if (inCurrent) {
+                        currRevenue += itemTotal;
+                        currCOGS += itemCost;
+                        currTickets.add(sale.id);
+                        currUnits += itemQty;
+
+                        expenseCategories['Mercadería (Costo)'] += itemCost;
+                        paymentMethods[item.medioDePago || 'Otros'] = (paymentMethods[item.medioDePago || 'Otros'] || 0) + itemTotal;
+
+                        const desc = String(item.desc).trim().toLowerCase();
+                        if (desc) productTotals.set(desc, (productTotals.get(desc) || 0) + itemQty);
+                        if (phone) clientTotals.set(phone, (clientTotals.get(phone) || 0) + itemTotal);
+                    }
+
+                    // Periodo Anterior (MoM)
+                    const inPrev = isAllYear ? (iYear === prevYear) : (iYear === prevYear && iMonth === prevMonth);
+                    if (inPrev) {
+                        prevRevenue += itemTotal;
+                        prevCOGS += itemCost;
+                    }
+                });
+            });
+
+            // Analizar Gastos (Opex y Compras de Lotes)
+            AppState.expenses.forEach(e => {
+                if (!e.date) return;
+                const dObj = new Date(e.date + 'T12:00:00');
+                const eYear = dObj.getFullYear();
+                const eMonth = dObj.getMonth();
+                const expAmount = Number(e.amount) || 0;
+
+                if (eYear === targetYear) cashflowExpenses[eMonth] += expAmount;
+
+                const inCurrent = isAllYear ? (eYear === targetYear) : (eYear === targetYear && eMonth === targetMonth);
+                if (inCurrent) {
+                    currOpex += expAmount;
+                    const cat = toProperCase(String(e.desc).trim());
+                    expenseCategories[cat] = (expenseCategories[cat] || 0) + expAmount;
+                }
+
+                const inPrev = isAllYear ? (eYear === prevYear) : (eYear === prevYear && eMonth === prevMonth);
+                if (inPrev) prevOpex += expAmount;
+            });
+
+            // Compras de stock para el gráfico anual de flujo
             AppState.products.forEach(p => {
                 (p.history || []).forEach(h => {
                     if (h.date) {
-                        const parts = h.date.split('-');
-                        if (parts.length === 3 && parseInt(parts[0]) === currentYear) purchasesData[parseInt(parts[1]) - 1] += Number(h.cost) || 0;
+                        const dObj = new Date(h.date + 'T12:00:00');
+                        if(dObj.getFullYear() === targetYear) {
+                            cashflowExpenses[dObj.getMonth()] += Number(h.cost) || 0;
+                        }
                     }
                 });
             });
 
-            AppState.expenses.forEach(e => {
-                if (e.date) {
-                    const parts = e.date.split('-');
-                    if (parts.length === 3 && parseInt(parts[0]) === currentYear) purchasesData[parseInt(parts[1]) - 1] += Number(e.amount) || 0;
+            // Cálculos Finales KPIs
+            const currProfit = currRevenue - currCOGS - currOpex;
+            const prevProfit = prevRevenue - prevCOGS - prevOpex;
+            
+            let profitMoM = 0;
+            if (prevProfit !== 0) profitMoM = ((currProfit - prevProfit) / Math.abs(prevProfit)) * 100;
+
+            const margin = currRevenue > 0 ? ((currRevenue - currCOGS) / currRevenue) * 100 : 0;
+            const avgTicket = currTickets.size > 0 ? currRevenue / currTickets.size : 0;
+            const upt = currTickets.size > 0 ? currUnits / currTickets.size : 0;
+
+            let inventoryValue = 0;
+            AppState.products.forEach(p => { inventoryValue += (Number(p.stock) || 0) * (Number(p.cost) || 0); });
+
+            // Actualizar UI KPIs
+            document.getElementById('kpi-utilidad').textContent = formatter.format(currProfit);
+            document.getElementById('kpi-margen').textContent = margin.toFixed(1) + '%';
+            document.getElementById('kpi-ticket').textContent = formatter.format(avgTicket);
+            document.getElementById('kpi-upt').textContent = `${upt.toFixed(1)} prendas x ticket (UPT)`;
+            document.getElementById('kpi-inventario').textContent = formatter.format(inventoryValue);
+
+            const momBadge = document.getElementById('kpi-mom-badge');
+            if (!isAllYear && prevProfit !== 0) { 
+                momBadge.classList.remove('hidden');
+                momBadge.classList.add('flex');
+                if (profitMoM >= 0) {
+                    momBadge.innerHTML = `<i data-feather="trending-up" class="w-3 h-3"></i> +${profitMoM.toFixed(1)}% vs mes ant.`;
+                    momBadge.className = "flex text-[10px] font-bold px-1.5 py-0.5 rounded bg-green-100 text-green-700 items-center gap-1";
+                } else {
+                    momBadge.innerHTML = `<i data-feather="trending-down" class="w-3 h-3"></i> ${profitMoM.toFixed(1)}% vs mes ant.`;
+                    momBadge.className = "flex text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-700 items-center gap-1";
+                }
+            } else {
+                momBadge.classList.add('hidden'); momBadge.classList.remove('flex');
+            }
+
+            // Renderizar Gráficos Chart.js
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#94a3b8' : '#64748b'; 
+            const gridColor = isDark ? '#334155' : '#f1f5f9';
+            const monthsLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            const commonBarOptions = { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: textColor }, grid: { display: false } }, y: { ticks: { color: textColor }, grid: { color: gridColor }, beginAtZero: true } } };
+            const commonPieOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: textColor, font: { size: 10 } } } } };
+
+            if (cashflowChartInstance) cashflowChartInstance.destroy();
+            cashflowChartInstance = new Chart(document.getElementById('cashflowChart'), {
+                type: 'bar', data: { labels: monthsLabels, datasets: [ { label: 'Ingresos', data: cashflowSales, backgroundColor: '#3B82F6', borderRadius: 4 }, { label: 'Egresos (Compras+Opex)', data: cashflowExpenses, backgroundColor: '#EF4444', borderRadius: 4 } ]}, 
+                options: { ...commonBarOptions, plugins: { legend: { labels: { color: textColor } } } }
+            });
+
+            if (customerTypeChartInstance) customerTypeChartInstance.destroy();
+            customerTypeChartInstance = new Chart(document.getElementById('customerTypeChart'), {
+                type: 'bar', data: { labels: monthsLabels, datasets: [ { label: 'Ventas a Nuevos', data: customerNew, backgroundColor: '#10B981', borderRadius: 4 }, { label: 'Ventas a Recurrentes', data: customerRecurrent, backgroundColor: '#8B5CF6', borderRadius: 4 } ]}, 
+                options: { ...commonBarOptions, scales: { x: { stacked: true, ticks: { color: textColor }, grid: { display: false } }, y: { stacked: true, ticks: { color: textColor }, grid: { color: gridColor } } }, plugins: { legend: { labels: { color: textColor } } } }
+            });
+
+            if (expensesDonutChartInstance) expensesDonutChartInstance.destroy();
+            const expLabels = Object.keys(expenseCategories).filter(k => expenseCategories[k] > 0);
+            const expData = expLabels.map(k => expenseCategories[k]);
+            expensesDonutChartInstance = new Chart(document.getElementById('expensesDonutChart'), {
+                type: 'doughnut', data: { labels: expLabels.length ? expLabels : ['Sin Egresos'], datasets: [{ data: expData.length ? expData : [1], backgroundColor: ['#F59E0B', '#EF4444', '#8B5CF6', '#3B82F6', '#10B981', '#64748b'], borderWidth: 0 }] }, 
+                options: commonPieOptions
+            });
+
+            if (paymentMethodsChartInstance) paymentMethodsChartInstance.destroy();
+            const pmLabels = Object.keys(paymentMethods).length ? Object.keys(paymentMethods) : ['Sin datos']; 
+            const pmData = Object.values(paymentMethods).length ? Object.values(paymentMethods) : [1];
+            paymentMethodsChartInstance = new Chart(document.getElementById('paymentMethodsChart'), {
+                type: 'pie', data: { labels: pmLabels, datasets: [{ data: pmData, backgroundColor: ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#64748b'], borderWidth: 0 }] }, options: commonPieOptions
+            });
+
+            // Renderizar Listas
+            renderTopProducts(productTotals);
+            renderTopClients(clientTotals);
+            renderInventoryMetrics();
+            renderAccumulatedClients();
+            
+            if (typeof feather !== 'undefined') feather.replace();
+        }
+
+        function renderTopProducts(productTotals) {
+            const list = document.getElementById('top-products-list'); if (!list) return;
+            const sorted = Array.from(productTotals.entries()).map(([name, qty]) => ({ name, qty })).sort((a, b) => b.qty - a.qty).slice(0, 10);
+            
+            if (sorted.length === 0) { list.innerHTML = '<li class="p-4 text-center text-gray-400 text-sm">Sin rotación en esta fecha.</li>'; return; }
+            list.innerHTML = sorted.map((p, i) => {
+                let badge = `<span class="text-sm font-bold text-gray-400 w-8 text-center">${i + 1}</span>`;
+                if(i===0) badge = `<span class="text-xl w-8 text-center">🔥</span>`; if(i===1) badge = `<span class="text-xl w-8 text-center">⭐</span>`; if(i===2) badge = `<span class="text-xl w-8 text-center">👍</span>`;
+                return `<li class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl"><div class="flex items-center gap-3">${badge}<div><p class="text-sm font-bold capitalize truncate max-w-[120px]">${sanitizeHTML(p.name)}</p></div></div><span class="font-black text-gray-700 dark:text-gray-300">${p.qty} <span class="text-[10px] font-normal">uds</span></span></li>`;
+            }).join('');
+        }
+
+        function renderTopClients(clientTotals) { 
+            const list = document.getElementById('top-clients-list'); if (!list) return;
+            const sorted = Array.from(clientTotals.entries()).map(([phone, total]) => ({ phone, total })).sort((a, b) => b.total - a.total).slice(0, 10);
+
+            if (sorted.length === 0) { list.innerHTML = '<li class="p-4 text-center text-gray-400 text-sm">Sin datos para esta fecha.</li>'; return; }
+            list.innerHTML = sorted.map((c, i) => {
+                let badge = `<span class="text-sm font-bold text-gray-400 w-8 text-center">${i + 1}</span>`;
+                if(i===0) badge = `<span class="text-2xl w-8 text-center">🥇</span>`; if(i===1) badge = `<span class="text-2xl w-8 text-center">🥈</span>`; if(i===2) badge = `<span class="text-2xl w-8 text-center">🥉</span>`;
+                return `<li class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl"><div class="flex items-center gap-3">${badge}<div><p class="text-sm font-bold">${sanitizeHTML(c.phone)}</p><a href="https://wa.me/${sanitizeHTML(c.phone)}" target="_blank" class="text-[10px] text-green-500 hover:text-green-600 font-medium flex items-center"><i data-feather="message-circle" class="w-3 h-3 mr-1"></i> Contactar</a></div></div><span class="font-black text-brand-accent">${formatter.format(c.total)}</span></li>`;
+            }).join('');
+        }
+
+        function renderAccumulatedClients() {
+            const hoy = new Date();
+            const acumuladores = {}; 
+            
+            AppState.sales.forEach(s => {
+                s.items.forEach(item => {
+                    if (!item.enviado && item.date) {
+                        const itemDate = new Date(item.date + 'T12:00:00');
+                        const diasInactivo = Math.floor((hoy - itemDate) / (1000 * 60 * 60 * 24));
+                        
+                        if (diasInactivo >= 30) {
+                            const phone = String(item.clientPhone).trim();
+                            if (!acumuladores[phone]) {
+                                acumuladores[phone] = { name: s.clientName || 'Cliente', phone: phone, oldestDays: diasInactivo, itemsCount: 0, trappedCash: 0 };
+                            }
+                            acumuladores[phone].itemsCount += Number(item.qty);
+                            acumuladores[phone].trappedCash += Number(item.total);
+                            if (diasInactivo > acumuladores[phone].oldestDays) acumuladores[phone].oldestDays = diasInactivo;
+                        }
+                    }
+                });
+            });
+            
+            const list = document.getElementById('accumulated-clients-list');
+            if(!list) return;
+            const sorted = Object.values(acumuladores).sort((a,b) => b.trappedCash - a.trappedCash);
+            
+            if(sorted.length === 0) {
+                list.innerHTML = '<li class="p-4 text-center text-red-400/80 text-sm">Ningún cliente atrasado.</li>'; return;
+            }
+            
+            list.innerHTML = sorted.map(c => `
+                <li class="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+                    <div>
+                        <p class="text-sm font-bold text-red-800 dark:text-red-300 truncate max-w-[120px]">${sanitizeHTML(c.phone)}</p>
+                        <a href="https://wa.me/${sanitizeHTML(c.phone)}" target="_blank" class="text-[10px] text-green-600 hover:text-green-700 font-medium flex items-center mt-0.5" title="Retraso: ${c.oldestDays} días"><i data-feather="message-circle" class="w-3 h-3 mr-1"></i> Avisar (${c.oldestDays}d)</a>
+                    </div>
+                    <div class="text-right">
+                        <span class="font-black text-red-600 block">${formatter.format(c.trappedCash)}</span>
+                        <span class="text-[10px] font-medium text-gray-500">${c.itemsCount} prendas retenidas</span>
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        function renderInventoryMetrics() {
+            let deadStock = []; let liquidationStock = []; const hoy = new Date();
+            let ultimasVentas = {};
+            
+            AppState.sales.forEach(s => s.items.forEach(i => { 
+                if(!ultimasVentas[i.productId] || new Date(i.date) > new Date(ultimasVentas[i.productId])) { ultimasVentas[i.productId] = i.date; } 
+            }));
+
+            AppState.products.forEach(p => {
+                const pStock = Number(p.stock) || 0;
+                if (pStock > 0) {
+                    let lastActivity = ultimasVentas[p.id];
+                    if (!lastActivity) lastActivity = p.history && p.history.length > 0 ? p.history[0].date : p.purchaseDate;
+                    
+                    let diasInactivo = 0; 
+                    if(lastActivity) diasInactivo = Math.floor((hoy - new Date(lastActivity)) / (1000 * 60 * 60 * 24));
+                    
+                    if (diasInactivo >= 30) deadStock.push({ ...p, diasInactivo });
+                    else if (pStock <= 3) liquidationStock.push({ ...p, diasInactivo });
                 }
             });
 
-            const isDark = document.documentElement.classList.contains('dark');
-            const commonOptions = {
-                responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-                scales: { x: { ticks: { color: isDark ? '#94a3b8' : '#64748b' }, grid: { display: false } }, y: { ticks: { color: isDark ? '#94a3b8' : '#64748b' }, grid: { color: isDark ? '#334155' : '#f1f5f9' }, beginAtZero: true } }
-            };
+            const mixedStock = [
+                ...deadStock.map(p => ({...p, type: 'dead'})).sort((a,b) => b.diasInactivo - a.diasInactivo).slice(0, 8),
+                ...liquidationStock.map(p => ({...p, type: 'liq'})).sort((a,b) => a.stock - b.stock).slice(0, 8)
+            ];
 
-            const ctxS = document.getElementById('salesChart');
-            if (ctxS) {
-                if (salesChartInstance) salesChartInstance.destroy();
-                salesChartInstance = new Chart(ctxS.getContext('2d'), { type: 'bar', data: { labels: months, datasets: [{ data: salesData, backgroundColor: '#3B82F6', borderRadius: 4 }] }, options: commonOptions });
+            const list = document.getElementById('dead-stock-list');
+            if(list) { 
+                list.innerHTML = mixedStock.length ? mixedStock.map(p => {
+                    const bgClass = p.type === 'dead' ? 'bg-gray-50 dark:bg-gray-700/30 border-transparent dark:border-gray-700' : 'bg-orange-50 dark:bg-orange-900/10 border-orange-100 dark:border-orange-900/30 border';
+                    const textClass = p.type === 'dead' ? 'text-gray-700 dark:text-gray-300' : 'text-orange-800 dark:text-orange-300';
+                    const subText = p.type === 'dead' ? `${p.diasInactivo} días sin venta` : 'Últimas unidades';
+                    return `<li class="flex justify-between items-center p-2.5 rounded-xl ${bgClass}"><div class="flex flex-col overflow-hidden"><span class="text-xs font-bold truncate ${textClass}">${sanitizeHTML(toProperCase(p.name))}</span><span class="text-[10px] text-gray-400">${subText}</span></div><span class="font-black text-gray-500 text-sm pl-2">${p.stock} <span class="text-[9px] font-normal">uds</span></span></li>`;
+                }).join('') : '<li class="p-4 text-center text-gray-400 text-xs">Inventario eficiente.</li>'; 
             }
-
-            const ctxP = document.getElementById('purchasesChart');
-            if (ctxP) {
-                if (purchasesChartInstance) purchasesChartInstance.destroy();
-                purchasesChartInstance = new Chart(ctxP.getContext('2d'), { type: 'bar', data: { labels: months, datasets: [{ data: purchasesData, backgroundColor: '#10B981', borderRadius: 4 }] }, options: commonOptions });
-            }
-        }
-
-        function renderTopClients() { 
-            const list = document.getElementById('top-clients-list');
-            if (!list) return;
-            const clientTotals = new Map();
-
-            AppState.sales.forEach(sale => {
-                sale.items.forEach(item => {
-                    const phone = String(item.clientPhone).trim();
-                    if(phone) clientTotals.set(phone, (clientTotals.get(phone) || 0) + Number(item.total));
-                });
-            });
-
-            const sorted = Array.from(clientTotals.entries()).map(([phone, total]) => ({ phone, total })).sort((a, b) => b.total - a.total).slice(0, 10);
-
-            if (sorted.length === 0) { list.innerHTML = '<li class="p-4 text-center text-gray-400">Sin datos aún.</li>'; return; }
-
-            list.innerHTML = sorted.map((c, i) => {
-                let badge = `<span class="text-sm font-bold text-gray-400 w-8 text-center">${i + 1}</span>`;
-                if(i===0) badge = `<span class="text-2xl w-8 text-center">🥇</span>`;
-                if(i===1) badge = `<span class="text-2xl w-8 text-center">🥈</span>`;
-                if(i===2) badge = `<span class="text-2xl w-8 text-center">🥉</span>`;
-
-                return `
-                    <li class="flex items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl">
-                        <div class="flex items-center gap-3">${badge}<div><p class="text-sm font-bold">${sanitizeHTML(c.phone)}</p><a href="https://wa.me/${sanitizeHTML(c.phone)}" target="_blank" class="text-[10px] text-green-500 hover:text-green-600 font-medium flex items-center"><i data-feather="message-circle" class="w-3 h-3 mr-1"></i> Contactar</a></div></div>
-                        <span class="font-black text-brand-accent">${formatter.format(c.total)}</span>
-                    </li>`;
-            }).join('');
-            if (typeof feather !== 'undefined') feather.replace();
         }
 
         document.getElementById('report-date-filter').addEventListener('change', renderDailyClose);
@@ -1725,6 +1518,151 @@ function deleteProduct(productId) {
             document.getElementById('report-results-total-row').removeAttribute('hidden');
         }
 
+        // ==========================================
+        // APPS SCRIPT TEMPLATE
+        // ==========================================
+        const GAS_CODE_TEMPLATE = `// ==========================================
+// BACKEND NoSQL - GOOGLE APPSCRIPT
+// ARQUITECTURA: COLUMNA A (ID), COLUMNA B (JSON)
+// ==========================================
+
+const SHEETS = { CLIENTES: 'Clientes', PRODUCTOS: 'Productos', VENTAS: 'Ventas', GASTOS: 'Gastos' };
+
+function doPost(e) {
+  try {
+    const params = JSON.parse(e.postData.contents);
+    const action = params.action; const payload = params.payload; let result = {};
+    switch (action) {
+      case 'getData': result = getAllData(); break;
+      case 'saveSale': result = saveSale(payload); break;
+      case 'saveProduct': result = saveProduct(payload); break;
+      case 'deleteProduct': result = deleteProduct(payload.id); break;
+      case 'deleteSaleItem': result = deleteSaleItem(payload.id); break;
+      case 'updateShippingMasive': result = updateShippingMasive(payload.itemsIds, payload.fechaEnvio); break;
+      case 'deletePurchaseHistory': result = deletePurchaseHistory(payload.productId, payload.historyIndex); break;
+      case 'saveExpense': result = saveExpense(payload); break;
+      case 'deleteExpense': result = deleteExpense(payload.id); break;
+      default: throw new Error('Acción no reconocida');
+    }
+    return ContentService.createTextOutput(JSON.stringify({ success: true, data: result })).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) { return ContentService.createTextOutput(JSON.stringify({ success: false, error: error.message })).setMimeType(ContentService.MimeType.JSON); }
+}
+
+function doGet(e) { return ContentService.createTextOutput("🚀 Backend Activo en Modo NoSQL (2 Columnas).").setMimeType(ContentService.MimeType.TEXT); }
+
+function getSheetData(sheetName) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName); if (!sheet) return [];
+  const data = sheet.getDataRange().getValues(); if (data.length <= 1) return []; 
+  const rows = [];
+  for (let i = 1; i < data.length; i++) {
+    if (!data[i][0]) continue; 
+    let obj = {}; try { obj = JSON.parse(data[i][1] || '{}'); } catch(e) {}
+    obj.id = data[i][0]; obj._rowIndex = i + 1; rows.push(obj);
+  }
+  return rows;
+}
+
+function getAllData() { return { clients: getSheetData(SHEETS.CLIENTES), products: getSheetData(SHEETS.PRODUCTOS), sales: getSheetData(SHEETS.VENTAS), expenses: getSheetData(SHEETS.GASTOS) }; }
+
+function saveExpense(data) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEETS.GASTOS);
+  const newId = Utilities.getUuid(); sheet.appendRow([newId, JSON.stringify(data)]); return { id: newId };
+}
+
+function deleteExpense(id) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEETS.GASTOS); const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) { if (data[i][0] === id) { sheet.deleteRow(i + 1); return { success: true }; } }
+  throw new Error("Gasto no encontrado");
+}
+
+function deletePurchaseHistory(productId, index) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEETS.PRODUCTOS); const products = getSheetData(SHEETS.PRODUCTOS);
+  const pIndex = products.findIndex(p => p.id === productId);
+  if (pIndex >= 0) {
+    const p = products[pIndex]; let history = p.history || [];
+    if (index >= 0 && index < history.length) {
+      const removedLote = history.splice(index, 1)[0];
+      p.stock = (Number(p.stock) || 0) - (Number(removedLote.qty) || 0); if (p.stock < 0) p.stock = 0;
+      p.history = history; const rowIndex = p._rowIndex; delete p.id; delete p._rowIndex;
+      sheet.getRange(rowIndex, 2).setValue(JSON.stringify(p)); return { success: true };
+    }
+  }
+  throw new Error("Producto o historial no encontrado");
+}
+
+function saveProduct(data) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEETS.PRODUCTOS); const products = getSheetData(SHEETS.PRODUCTOS);
+  const existingProduct = products.find(p => p.name.toLowerCase() === data.name.toLowerCase());
+  const newHistoryEntry = { date: data.date, qty: data.stockToAdd, cost: data.cost };
+  if (existingProduct) {
+    const oldStock = Number(existingProduct.stock) || 0; const oldCost = Number(existingProduct.cost) || 0; 
+    const newTotalStock = oldStock + Number(data.stockToAdd);
+    const oldTotalValue = oldStock * oldCost; const newAverageCost = (oldTotalValue + Number(data.cost)) / newTotalStock;
+    let history = existingProduct.history || []; history.push(newHistoryEntry);
+    existingProduct.stock = newTotalStock; existingProduct.cost = newAverageCost; existingProduct.history = history;
+    const rowToUpdate = existingProduct._rowIndex; delete existingProduct.id; delete existingProduct._rowIndex;
+    sheet.getRange(rowToUpdate, 2).setValue(JSON.stringify(existingProduct)); return { id: rowToUpdate, action: 'updated' };
+  } else {
+    const newId = Utilities.getUuid(); const unitCost = data.cost / data.stockToAdd;
+    sheet.appendRow([newId, JSON.stringify({ name: data.name, stock: data.stockToAdd, cost: unitCost, purchaseDate: data.date, history: [newHistoryEntry] })]);
+    return { id: newId, action: 'created' };
+  }
+}
+
+function saveSale(data) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet(); const salesSheet = ss.getSheetByName(SHEETS.VENTAS); const clientsSheet = ss.getSheetByName(SHEETS.CLIENTES); const productsSheet = ss.getSheetByName(SHEETS.PRODUCTOS);
+  let clientId = data.clientId;
+  if (!clientId) {
+    const existingClient = getSheetData(SHEETS.CLIENTES).find(c => String(c.phone) === String(data.clientPhone));
+    if (existingClient) clientId = existingClient.id; else { clientId = Utilities.getUuid(); clientsSheet.appendRow([clientId, JSON.stringify({ phone: data.clientPhone, name: data.clientName })]); }
+  }
+  const saleId = Utilities.getUuid(); const products = getSheetData(SHEETS.PRODUCTOS);
+  data.items.forEach(item => {
+    const itemId = Utilities.getUuid(); 
+    salesSheet.appendRow([itemId, JSON.stringify({ saleId: saleId, clientId: clientId, clientPhone: data.clientPhone, date: data.date, medioDePago: data.medioDePago, productId: item.productId, desc: item.desc, qty: item.qty, price: item.price, total: item.total, totalCosto: item.totalCosto, color: item.color, talla: item.talla, enviado: false, fechaEnvio: '' })]);
+    const pIndex = products.findIndex(p => p.id === item.productId);
+    if (pIndex >= 0) products[pIndex].stock = (Number(products[pIndex].stock) || 0) - item.qty;
+  });
+  products.forEach(p => { if (p._rowIndex) { const rowIndex = p._rowIndex; const pCopy = {...p}; delete pCopy.id; delete pCopy._rowIndex; productsSheet.getRange(rowIndex, 2).setValue(JSON.stringify(pCopy)); } });
+  return { saleId: saleId };
+}
+
+function deleteSaleItem(itemId) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet(); const salesSheet = ss.getSheetByName(SHEETS.VENTAS); const data = salesSheet.getDataRange().getValues();
+  let deleteRowIndex = -1; let itemObj = null;
+  for (let i = 1; i < data.length; i++) { if(data[i][0] === itemId) { deleteRowIndex = i + 1; try { itemObj = JSON.parse(data[i][1]); } catch(e) {} break; } }
+  if (deleteRowIndex === -1 || !itemObj) throw new Error("Registro no encontrado.");
+  if (itemObj.productId && itemObj.qty > 0) {
+    const productsSheet = ss.getSheetByName(SHEETS.PRODUCTOS); const products = getSheetData(SHEETS.PRODUCTOS); const pIndex = products.findIndex(p => p.id === itemObj.productId);
+    if (pIndex >= 0) { const p = products[pIndex]; p.stock = (Number(p.stock) || 0) + itemObj.qty; const rowIndex = p._rowIndex; const pCopy = {...p}; delete pCopy.id; delete pCopy._rowIndex; productsSheet.getRange(rowIndex, 2).setValue(JSON.stringify(pCopy)); }
+  }
+  salesSheet.deleteRow(deleteRowIndex); return { success: true };
+}
+
+function updateShippingMasive(itemsIds, fechaEnvio) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEETS.VENTAS); const data = sheet.getDataRange().getValues(); 
+  for (let i = 1; i < data.length; i++) {
+    if(!data[i][0]) continue; let itemObj; try { itemObj = JSON.parse(data[i][1]); } catch(e) { continue; }
+    if (itemsIds.includes(data[i][0])) { itemObj.enviado = true; itemObj.fechaEnvio = fechaEnvio; sheet.getRange(i + 1, 2).setValue(JSON.stringify(itemObj)); }
+  }
+  return { success: true };
+}
+
+function deleteProduct(productId) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEETS.PRODUCTOS); const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) { if (data[i][0] === productId) { sheet.deleteRow(i + 1); return { success: true }; } }
+  throw new Error("Producto no encontrado");
+}`;
+
+        document.getElementById('gas-code-block').value = GAS_CODE_TEMPLATE;
+
+        window.copyGasCode = function() {
+            const ta = document.getElementById('gas-code-block'); ta.select(); document.execCommand('copy'); UI.showToast("Copiado", "Código copiado al portapapeles.");
+        }
+
+        document.getElementById('config-form').addEventListener('submit', (e) => {
+            e.preventDefault(); GAS_WEB_APP_URL = document.getElementById('config-gas-url').value.trim(); localStorage.setItem('latam5s_gas_url', GAS_WEB_APP_URL); UI.showToast("Guardado", "La URL de Apps Script se ha guardado localmente.");
+        });
     </script>
 </body>
 </html>
