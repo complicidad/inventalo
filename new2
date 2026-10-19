@@ -1,0 +1,1705 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>InventoSys - Cloud ERP Premium</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: { sans: ['Inter', 'sans-serif'] },
+      colors: {
+        brand: {
+          50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc', 400: '#818cf8',
+          500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 800: '#3730a3', 900: '#312e81'
+        },
+        surface: {
+          50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 400: '#94a3b8',
+          500: '#64748b', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a'
+        }
+      }
+    }
+  }
+};</script>
+    <style>body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+.fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.slide-down { animation: slideDown 0.3s ease-out; }
+@keyframes slideDown { from { opacity: 0; transform: scaleY(0.95); transform-origin: top; } to { opacity: 1; transform: scaleY(1); transform-origin: top; } }
+
+.uppercase-input { text-transform: uppercase; }
+input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input:focus, select:focus, textarea:focus { outline: none; box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); border-color: #6366f1; }
+</style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden selection:bg-brand-100 selection:text-brand-900">
+
+    <header class="bg-surface-900 text-white shadow-md z-20 shrink-0 border-b border-surface-800">
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16 gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="bg-brand-600 p-1.5 rounded-lg shadow-inner">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                    </div>
+                    <span class="font-bold text-xl tracking-tight text-white">InventoSys</span>
+                </div>
+
+                <nav class="hidden lg:flex space-x-1 bg-surface-800 p-1 rounded-xl shadow-inner border border-surface-700/50">
+                    <button onclick="app.switchTab('inventory')" id="nav-inventory" class="nav-btn px-4 py-1.5 rounded-lg text-sm font-medium text-surface-300 hover:text-white hover:bg-surface-700 transition-all duration-200">Inventario</button>
+                    <button onclick="app.switchTab('sales')" id="nav-sales" class="nav-btn px-4 py-1.5 rounded-lg text-sm font-medium text-surface-300 hover:text-white hover:bg-surface-700 transition-all duration-200">Ventas Comerciales</button>
+                    <button onclick="app.switchTab('clientes')" id="nav-clientes" class="nav-btn px-4 py-1.5 rounded-lg text-sm font-medium text-surface-300 hover:text-white hover:bg-surface-700 transition-all duration-200">Clientes &amp; Envíos</button>
+                    <button onclick="app.switchTab('gastos')" id="nav-gastos" class="nav-btn px-4 py-1.5 rounded-lg text-sm font-medium text-surface-300 hover:text-white hover:bg-surface-700 transition-all duration-200">Gastos</button>
+                    <button onclick="app.switchTab('reportes')" id="nav-reportes" class="nav-btn px-4 py-1.5 rounded-lg text-sm font-medium text-surface-300 hover:text-white hover:bg-surface-700 transition-all duration-200">Reportes</button>
+                    <button onclick="app.switchTab('seguimiento')" id="nav-seguimiento" class="nav-btn px-4 py-1.5 rounded-lg text-sm font-medium text-surface-300 hover:text-white hover:bg-surface-700 transition-all duration-200">CRM Seguimiento</button>
+                    <button onclick="app.switchTab('config')" id="nav-config" class="nav-btn px-4 py-1.5 rounded-lg text-sm font-medium text-surface-300 hover:text-white hover:bg-surface-700 transition-all duration-200">Ajustes</button>
+                </nav>
+
+                <div class="flex items-center gap-3">
+                    <span id="sync-status" class="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-surface-400" title="Estado de sincronización">
+                        <span id="sync-dot" class="w-2 h-2 rounded-full bg-surface-500"></span><span id="sync-text" class="hidden sm:inline">Sin conexión</span>
+                    </span>
+                    <div class="lg:hidden flex items-center">
+                        <select onchange="app.switchTab(this.value)" id="mobile-nav" class="bg-surface-800 text-white border border-surface-700 rounded-lg py-1.5 pl-3 pr-8 text-sm font-medium outline-none">
+                            <option value="inventory">Inventario</option>
+                            <option value="sales">Ventas Comerciales</option>
+                            <option value="clientes">Clientes &amp; Envíos</option>
+                            <option value="gastos">Gastos</option>
+                            <option value="reportes">Reportes</option>
+                            <option value="seguimiento">CRM Seguimiento</option>
+                            <option value="config">Ajustes</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 lg:p-8 relative max-w-[1600px] mx-auto w-full">
+
+        <!-- ================= INVENTARIO ================= -->
+        <section id="view-inventory" class="view-section hidden fade-in">
+            <div class="mb-6 flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold text-surface-900 tracking-tight">Gestión de Inventario Físico</h1>
+                    <p class="text-sm text-surface-500 mt-1">Control maestro de familias de productos, variantes y lotes de ingreso.</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-surface-200 p-6 mb-8">
+                <h2 class="text-base font-semibold mb-5 text-surface-800 border-b border-surface-100 pb-3 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Registrar Nueva Familia de Producto
+                </h2>
+                <form id="form-inventory" onsubmit="app.saveInventory(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 items-end">
+                    <div class="lg:col-span-2">
+                        <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">Nombre del Producto *</label>
+                        <input type="text" id="inv-name" required maxlength="80" class="w-full uppercase-input rounded-xl border border-surface-300 px-4 py-2.5 text-sm transition-colors bg-surface-50 focus:bg-white shadow-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">Categoría *</label>
+                        <select id="inv-category" required class="w-full uppercase-input rounded-xl border border-surface-300 px-4 py-2.5 text-sm transition-colors bg-surface-50 focus:bg-white shadow-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 cursor-pointer"></select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">Color Inicial</label>
+                        <select id="inv-color" class="w-full uppercase-input rounded-xl border border-surface-300 px-4 py-2.5 text-sm transition-colors bg-surface-50 focus:bg-white shadow-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 cursor-pointer"></select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">Talla Inicial</label>
+                        <select id="inv-size" class="w-full uppercase-input rounded-xl border border-surface-300 px-4 py-2.5 text-sm transition-colors bg-surface-50 focus:bg-white shadow-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 cursor-pointer"></select>
+                    </div>
+                    <div class="lg:col-span-2">
+                        <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">Fecha Compra Lote *</label>
+                        <input type="date" id="inv-date" required class="w-full rounded-xl border border-surface-300 px-4 py-2.5 text-sm transition-colors bg-surface-50 focus:bg-white shadow-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 text-surface-700 cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-brand-600 mb-1.5 uppercase tracking-wider">Cant. Ingresada *</label>
+                        <input type="number" id="inv-stock" min="1" step="1" required class="w-full rounded-xl border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm font-bold text-brand-800 transition-colors focus:bg-white shadow-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">Costo Total Lote ($)</label>
+                        <input type="number" id="inv-cost-total" step="0.01" min="0" class="w-full rounded-xl border border-surface-300 px-4 py-2.5 text-sm transition-colors bg-surface-50 focus:bg-white shadow-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 text-surface-700 font-medium">
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="w-full bg-surface-900 hover:bg-surface-800 text-white font-medium py-2.5 px-6 rounded-xl shadow-sm transition-transform active:scale-95 flex justify-center items-center gap-2 text-sm">Crear Familia</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-surface-200 overflow-hidden flex flex-col">
+                <div class="p-5 border-b border-surface-100 bg-white flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
+                    <h2 class="text-base font-semibold text-surface-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-surface-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                        Estructura de Inventario (Por Variante)
+                    </h2>
+                    <div class="flex flex-wrap gap-3 w-full xl:w-auto items-center">
+                        <div class="flex items-center bg-surface-50 border border-surface-200 rounded-xl overflow-hidden h-10 shadow-sm transition-colors focus-within:border-brand-500 focus-within:ring-1 focus-within:ring-brand-500">
+                            <select id="inv-date-type" onchange="app.changePage('inventory', 1)" class="bg-transparent border-r border-surface-200 px-3 h-full text-xs font-medium text-surface-600 outline-none cursor-pointer">
+                                <option value="registro">Reg. Sistema</option>
+                                <option value="compra">F. Compra</option>
+                            </select>
+                            <input type="date" id="inv-date-start" onchange="app.changePage('inventory', 1)" class="bg-transparent px-3 h-full text-xs outline-none text-surface-600 font-medium cursor-pointer">
+                            <span class="text-surface-300">-</span>
+                            <input type="date" id="inv-date-end" onchange="app.changePage('inventory', 1)" class="bg-transparent px-3 h-full text-xs outline-none text-surface-600 font-medium cursor-pointer">
+                        </div>
+                        <div class="relative flex-1 xl:w-72 min-w-[200px]">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-4 w-4 text-surface-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                            </div>
+                            <input type="text" id="search-inventory" oninput="app.changePage('inventory', 1)" placeholder="Buscar código, nombre, variante..." class="w-full rounded-xl border border-surface-200 pl-10 pr-4 h-10 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none bg-surface-50 focus:bg-white transition-all shadow-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container overflow-x-auto">
+                    <table class="w-full text-left whitespace-nowrap">
+                        <thead class="bg-surface-50 text-xs font-semibold text-surface-500 uppercase tracking-wider border-b border-surface-200">
+                            <tr><th class="px-6 py-3 border-r border-surface-100 w-3/5">Código y Familia Maestra</th><th class="px-6 py-3 text-right">Consolidado Físico y Acciones</th></tr>
+                        </thead>
+                        <tbody id="inventory-tbody" class="divide-y divide-surface-100 text-sm text-surface-700 bg-white"></tbody>
+                    </table>
+                </div>
+                <div class="px-5 py-3 border-t border-surface-100 bg-surface-50 flex items-center justify-between" id="inventory-pagination"></div>
+            </div>
+        </section>
+
+        <!-- ================= VENTAS ================= -->
+        <section id="view-sales" class="view-section hidden fade-in">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-surface-900 tracking-tight">Punto de Venta Comercial</h1>
+                <p class="text-sm text-surface-500 mt-1">Registro de transacciones y análisis de ingresos estructurado por productos.</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-surface-200 p-6 mb-8 relative">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 pb-6 border-b border-surface-100">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">WhatsApp del Cliente *</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-surface-400 font-medium">+</span>
+                            <input type="tel" id="global-sale-customer" inputmode="numeric" maxlength="15" placeholder="987654321" class="w-full rounded-xl border border-surface-300 pl-10 pr-4 py-2.5 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 font-bold text-lg outline-none transition-all shadow-sm bg-surface-50 focus:bg-white">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">Fecha de Venta *</label>
+                        <input type="date" id="global-sale-date" required class="w-full rounded-xl border border-surface-300 px-4 py-2.5 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 font-medium outline-none text-surface-700 transition-all shadow-sm bg-surface-50 focus:bg-white h-[46px] cursor-pointer">
+                    </div>
+                </div>
+
+                <div id="sale-rows-container" class="space-y-3"></div>
+
+                <div class="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4 pt-5 border-t border-surface-100">
+                    <button type="button" onclick="app.addSaleRow()" class="text-brand-600 font-medium hover:bg-brand-50 px-5 py-2.5 rounded-xl transition-colors border border-dashed border-brand-200 w-full sm:w-auto flex items-center justify-center gap-2 text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Añadir Producto
+                    </button>
+                    <button type="button" onclick="app.submitVenta()" class="bg-surface-900 hover:bg-surface-800 text-white font-medium py-2.5 px-8 rounded-xl shadow-sm w-full sm:w-auto transition-transform active:scale-95 flex items-center justify-center gap-2 text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Procesar Transacción
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-surface-200 overflow-hidden flex flex-col">
+                <div class="p-5 border-b border-surface-200 bg-white flex flex-col lg:flex-row justify-between lg:items-center gap-4">
+                    <h2 class="text-base font-semibold text-surface-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path></svg>
+                        Rendimiento por Producto (Ventas)
+                    </h2>
+                    <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                        <div class="flex items-center bg-surface-50 border border-surface-200 rounded-xl overflow-hidden h-10 shadow-sm">
+                            <select id="sale-date-type" onchange="app.changePage('sales', 1)" class="bg-transparent border-r border-surface-200 px-3 h-full text-xs font-medium text-surface-600 outline-none cursor-pointer">
+                                <option value="venta">F. Venta</option>
+                                <option value="registro">Reg. Sistema</option>
+                            </select>
+                            <input type="date" id="sale-date-start" onchange="app.changePage('sales', 1)" class="bg-transparent px-2 h-full text-xs outline-none text-surface-600 font-medium cursor-pointer">
+                            <span class="text-surface-300">-</span>
+                            <input type="date" id="sale-date-end" onchange="app.changePage('sales', 1)" class="bg-transparent px-2 h-full text-xs outline-none text-surface-600 font-medium cursor-pointer">
+                        </div>
+                        <div class="relative flex-1 min-w-[200px]">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-4 w-4 text-surface-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                            </div>
+                            <input type="text" id="search-sales" placeholder="Buscar cliente, código o producto..." oninput="app.changePage('sales', 1)" class="w-full rounded-xl border border-surface-200 pl-10 pr-4 h-10 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none bg-surface-50 focus:bg-white shadow-sm transition-all">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container overflow-x-auto">
+                    <table class="w-full text-left whitespace-nowrap">
+                        <thead class="bg-surface-50 text-xs font-semibold text-surface-500 uppercase tracking-wider border-b border-surface-200">
+                            <tr><th class="px-6 py-3 border-r border-surface-100 w-3/5">Código y Familia de Producto</th><th class="px-6 py-3 text-right">Métricas de Venta</th></tr>
+                        </thead>
+                        <tbody id="sales-tbody" class="divide-y divide-surface-100 text-sm text-surface-700 bg-white"></tbody>
+                    </table>
+                </div>
+                <div class="px-5 py-3 border-t border-surface-100 bg-surface-50 flex items-center justify-between" id="sales-pagination"></div>
+            </div>
+        </section>
+
+        <!-- ================= CLIENTES ================= -->
+        <section id="view-clientes" class="view-section hidden fade-in">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-surface-900 tracking-tight">Manifiesto Logístico</h1>
+                <p class="text-sm text-surface-500 mt-1">Control estructurado de despachos, tracking y envíos a clientes.</p>
+            </div>
+
+            <div class="bg-surface-50/50 rounded-2xl shadow-sm border border-surface-200 overflow-hidden flex flex-col">
+                <div class="p-5 border-b border-surface-200 bg-white shadow-sm z-10 relative">
+                    <div class="flex flex-col lg:flex-row gap-4 items-start lg:items-end">
+                        <div class="w-full lg:w-1/3">
+                            <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">Filtro Masivo (WhatsApps)</label>
+                            <textarea id="clientes-massive-list" rows="1" placeholder="Pegar lista separada por espacios..." oninput="app.changePage('clientes', 1)" class="w-full rounded-xl border border-surface-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none bg-surface-50 focus:bg-white resize-none shadow-sm transition-all"></textarea>
+                        </div>
+                        <div class="flex flex-wrap gap-3 flex-1 items-end justify-end w-full">
+                            <div class="flex items-center bg-surface-50 border border-surface-300 rounded-xl overflow-hidden h-10 shadow-sm transition-colors">
+                                <select id="clientes-date-type" onchange="app.changePage('clientes', 1)" class="bg-transparent border-r border-surface-300 px-3 h-full text-xs font-medium text-surface-600 outline-none cursor-pointer">
+                                    <option value="venta">F. Venta</option>
+                                    <option value="envio">F. Envío</option>
+                                </select>
+                                <input type="date" id="clientes-date-start" onchange="app.changePage('clientes', 1)" class="bg-transparent px-2 h-full text-xs outline-none text-surface-600 font-medium cursor-pointer">
+                                <span class="text-surface-300 px-1">-</span>
+                                <input type="date" id="clientes-date-end" onchange="app.changePage('clientes', 1)" class="bg-transparent px-2 h-full text-xs outline-none text-surface-600 font-medium cursor-pointer">
+                            </div>
+                            <div class="relative w-full lg:w-64">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-4 w-4 text-surface-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                                </div>
+                                <input type="text" id="search-clientes" placeholder="Buscar cliente..." oninput="app.changePage('clientes', 1)" class="w-full rounded-xl border border-surface-300 pl-10 pr-4 h-10 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none bg-surface-50 focus:bg-white shadow-sm transition-all">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container overflow-x-auto">
+                    <table class="w-full text-left whitespace-nowrap">
+                        <thead class="bg-surface-50 text-xs font-semibold text-surface-500 uppercase tracking-wider border-b border-surface-200">
+                            <tr><th class="px-6 py-3 border-r border-surface-100 w-3/5">Estado Logístico</th><th class="px-6 py-3 text-right">Métricas Globales</th></tr>
+                        </thead>
+                        <tbody id="clientes-tbody" class="divide-y divide-surface-100 text-sm text-surface-700 bg-white"></tbody>
+                    </table>
+                </div>
+                <div class="px-5 py-3 border-t border-surface-200 bg-white flex items-center justify-between" id="clientes-pagination"></div>
+            </div>
+        </section>
+
+        <!-- ================= GASTOS ================= -->
+        <section id="view-gastos" class="view-section hidden fade-in">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-surface-900 tracking-tight">Control de Egresos</h1>
+                <p class="text-sm text-surface-500 mt-1">Contabilidad interna de gastos operativos e insumos.</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-surface-200 p-6 mb-8">
+                <form id="form-gastos" onsubmit="app.saveGasto(event)" class="grid grid-cols-1 md:grid-cols-4 gap-5 items-end">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">Fecha de Egreso *</label>
+                        <input type="date" id="gasto-date" required class="w-full rounded-xl border border-surface-300 px-4 py-2.5 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 outline-none shadow-sm text-sm bg-surface-50 focus:bg-white transition-all h-[42px] cursor-pointer">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">Descripción o Concepto *</label>
+                        <input type="text" id="gasto-desc" required maxlength="120" placeholder="Ej. Materiales, Publicidad..." class="w-full uppercase-input rounded-xl border border-surface-300 px-4 py-2.5 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 outline-none shadow-sm text-sm bg-surface-50 focus:bg-white transition-all h-[42px]">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-rose-600 mb-1.5 uppercase tracking-wider">Monto Total ($) *</label>
+                        <div class="flex shadow-sm rounded-xl">
+                            <input type="number" id="gasto-monto" step="0.01" min="0.01" required class="w-full rounded-l-xl border border-surface-300 px-4 py-2.5 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 font-bold outline-none text-rose-600 bg-rose-50 border-r-0 text-sm h-[42px]">
+                            <button type="submit" class="bg-surface-900 hover:bg-surface-800 text-white font-bold py-2.5 px-5 rounded-r-xl transition-colors text-sm h-[42px]">+</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-surface-200 overflow-hidden">
+                <div class="px-5 py-4 border-b border-surface-100 bg-white">
+                    <h2 class="text-sm font-semibold text-surface-800">Libro Contable (Egresos Recientes)</h2>
+                </div>
+                <div class="table-container overflow-x-auto">
+                    <table class="w-full whitespace-nowrap text-left text-sm">
+                        <thead class="bg-surface-50 text-xs font-semibold text-surface-500 uppercase tracking-wider border-b border-surface-200">
+                            <tr><th class="px-6 py-3 w-40">Fecha</th><th class="px-6 py-3">Concepto Registrado</th><th class="px-6 py-3 font-bold text-rose-600 text-right w-40">Salida</th><th class="px-6 py-3 text-right w-32">Acción</th></tr>
+                        </thead>
+                        <tbody id="gastos-tbody" class="divide-y divide-surface-100 text-surface-700 bg-white"></tbody>
+                    </table>
+                </div>
+                <div class="px-5 py-3 border-t border-surface-100 bg-surface-50 flex items-center justify-between" id="gastos-pagination"></div>
+            </div>
+        </section>
+
+        <!-- ================= REPORTES ================= -->
+        <section id="view-reportes" class="view-section hidden fade-in">
+            <div class="mb-6 flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold text-surface-900 tracking-tight">Dashboard Financiero</h1>
+                    <p class="text-sm text-surface-500 mt-1">Análisis de rentabilidad basado en FIFO y flujos de caja.</p>
+                </div>
+                <button onclick="app.renderReportes()" class="bg-white border border-surface-200 px-4 py-2 rounded-xl text-sm font-medium hover:bg-surface-50 flex items-center gap-2 shadow-sm text-surface-700 transition-transform active:scale-95">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Actualizar
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-200 p-5 relative overflow-hidden group">
+                    <p class="text-[11px] font-semibold text-surface-500 uppercase tracking-widest mb-1.5">Ingresos (Ventas)</p>
+                    <p id="rep-ingresos" class="text-3xl font-bold text-emerald-600 tracking-tight">$0.00</p>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-200 p-5 relative overflow-hidden group">
+                    <p class="text-[11px] font-semibold text-surface-500 uppercase tracking-widest mb-1.5">Costo Mercadería (FIFO)</p>
+                    <p id="rep-costos" class="text-3xl font-bold text-amber-600 tracking-tight">$0.00</p>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-200 p-5 relative overflow-hidden group">
+                    <p class="text-[11px] font-semibold text-surface-500 uppercase tracking-widest mb-1.5">Otros Egresos</p>
+                    <p id="rep-gastos" class="text-3xl font-bold text-rose-500 tracking-tight">$0.00</p>
+                </div>
+                <div class="bg-surface-900 rounded-2xl shadow-sm border border-surface-800 p-5 relative overflow-hidden text-white">
+                    <p class="text-[11px] font-semibold text-surface-400 uppercase tracking-widest mb-1.5">Ganancia Neta Real</p>
+                    <p id="rep-ganancia" class="text-3xl font-bold tracking-tight">$0.00</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-200 p-5">
+                    <h3 class="text-[11px] font-semibold text-surface-500 mb-4 uppercase tracking-widest">Ingresos Brutos (Últimos 7 Días)</h3>
+                    <div class="h-60 w-full"><canvas id="chart-revenue"></canvas></div>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-200 p-5">
+                    <h3 class="text-[11px] font-semibold text-surface-500 mb-4 uppercase tracking-widest">Ventas por Categoría (Mes Actual)</h3>
+                    <div class="h-60 w-full flex justify-center"><canvas id="chart-categories"></canvas></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-200 p-5">
+                    <h3 class="text-[11px] font-semibold text-surface-500 mb-4 uppercase tracking-widest">Ingresos vs Egresos (Últimos 6 Meses)</h3>
+                    <div class="h-60 w-full"><canvas id="chart-finances"></canvas></div>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-200 p-5">
+                    <h3 class="text-[11px] font-semibold text-surface-500 mb-4 uppercase tracking-widest">Retención: Nuevos vs Recurrentes</h3>
+                    <div class="h-60 w-full flex justify-center"><canvas id="chart-retention"></canvas></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-200 p-5">
+                    <h3 class="text-[11px] font-semibold text-surface-800 mb-4 border-b border-surface-100 pb-2 uppercase tracking-widest">Activos Físicos Valorizados</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center text-sm"><span class="text-surface-600">Costo Total en Almacén:</span><span id="rep-inv-valor" class="font-bold text-brand-600">$0.00</span></div>
+                        <div class="flex justify-between items-center text-sm"><span class="text-surface-600">Unidades Físicas:</span><span id="rep-inv-unidades" class="font-bold text-surface-800">0</span></div>
+                        <div class="flex justify-between items-center text-sm"><span class="text-surface-600">Familias de Productos:</span><span id="rep-inv-tipos" class="font-bold text-surface-800">0</span></div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-200 p-5">
+                    <h3 class="text-[11px] font-semibold text-surface-800 mb-4 border-b border-surface-100 pb-2 uppercase tracking-widest">Transacciones Globales</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center text-sm"><span class="text-surface-600">Tickets de Venta Exitosos:</span><span id="rep-pedidos-ok" class="font-bold text-emerald-600">0</span></div>
+                        <div class="flex justify-between items-center text-sm"><span class="text-surface-600">Unidades Despachadas:</span><span id="rep-pedidos-enviados" class="font-bold text-brand-500">0</span></div>
+                        <div class="flex justify-between items-center text-sm"><span class="text-surface-600">Transacciones Anuladas:</span><span id="rep-pedidos-anulados" class="font-bold text-rose-500">0</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= CRM ================= -->
+        <section id="view-seguimiento" class="view-section hidden fade-in">
+            <div class="mb-6 flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold text-surface-900 tracking-tight">CRM y Seguimiento Logístico</h1>
+                    <p class="text-sm text-surface-500 mt-1">Detección de embudos logísticos y métricas de fidelidad de clientes.</p>
+                </div>
+                <button onclick="app.renderSeguimiento()" class="bg-brand-50 text-brand-700 border border-brand-200 px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-100 flex items-center gap-2 shadow-sm transition-transform active:scale-95">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg> Refrescar Análisis
+                </button>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-rose-200 mb-6 overflow-hidden">
+                <div class="px-5 py-4 bg-rose-50/50 border-b border-rose-100 flex items-center gap-3">
+                    <div class="p-1.5 bg-rose-100 rounded-lg"><svg class="w-5 h-5 text-rose-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg></div>
+                    <h2 class="text-xs font-bold text-rose-900 uppercase tracking-widest">Alertas de Retraso Logístico (&gt; 7 Días)</h2>
+                </div>
+                <div class="table-container overflow-x-auto">
+                    <table class="w-full text-sm text-left whitespace-nowrap">
+                        <thead class="bg-surface-50 text-xs font-semibold text-surface-500 uppercase border-b border-surface-200 tracking-wider">
+                            <tr><th class="px-6 py-3 w-1/3">Cliente (WhatsApp)</th><th class="px-6 py-3">Ticket Más Antiguo</th><th class="px-6 py-3 text-center">Días de Retraso</th><th class="px-6 py-3 text-right">Acción</th></tr>
+                        </thead>
+                        <tbody id="seg-retrasos-tbody" class="divide-y divide-surface-100 text-surface-700 bg-white"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-amber-200 mb-6 overflow-hidden">
+                <div class="px-5 py-4 bg-amber-50/50 border-b border-amber-100 flex items-center gap-3">
+                    <div class="p-1.5 bg-amber-100 rounded-lg"><svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                    <h2 class="text-xs font-bold text-amber-900 uppercase tracking-widest">Análisis de Stock Inmovilizado (Riesgo de Capital)</h2>
+                </div>
+                <div class="table-container overflow-x-auto max-h-[400px]">
+                    <table class="w-full text-sm text-left whitespace-nowrap">
+                        <thead class="bg-surface-50 text-xs font-semibold text-surface-500 uppercase border-b border-surface-200 tracking-wider sticky top-0">
+                            <tr>
+                                <th class="px-6 py-3">Producto y Variante</th>
+                                <th class="px-6 py-3">Fecha de Ingreso</th>
+                                <th class="px-6 py-3 text-center">Días en Almacén</th>
+                                <th class="px-6 py-3 text-center">Stock Atrapado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="seg-inmovilizado-tbody" class="divide-y divide-surface-100 text-surface-700 bg-white"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-200 overflow-hidden flex flex-col">
+                    <div class="px-5 py-3.5 bg-surface-50/50 border-b border-surface-100"><h3 class="text-[11px] font-semibold text-surface-600 uppercase tracking-widest">Top Clientes (Mes Actual)</h3></div>
+                    <ul id="seg-top-mes" class="divide-y divide-surface-100 text-sm flex-1 overflow-y-auto"></ul>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-200 overflow-hidden flex flex-col">
+                    <div class="px-5 py-3.5 bg-surface-50/50 border-b border-surface-100"><h3 class="text-[11px] font-semibold text-surface-600 uppercase tracking-widest">Top Clientes (Histórico)</h3></div>
+                    <ul id="seg-top-hist" class="divide-y divide-surface-100 text-sm flex-1 overflow-y-auto"></ul>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-200 overflow-hidden flex flex-col">
+                    <div class="px-5 py-3.5 bg-surface-50/50 border-b border-surface-100"><h3 class="text-[11px] font-semibold text-surface-600 uppercase tracking-widest">Top Variantes (Rotación)</h3></div>
+                    <ul id="seg-top-prod" class="divide-y divide-surface-100 text-sm flex-1 overflow-y-auto"></ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= AJUSTES ================= -->
+        <section id="view-config" class="view-section hidden fade-in">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-surface-900 tracking-tight">Ajustes del Sistema</h1>
+                <p class="text-sm text-surface-500 mt-1">Conexión a la nube y diccionarios de datos.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-emerald-200 p-6 lg:col-span-2 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-emerald-50/30 z-0 pointer-events-none"></div>
+                    <div class="relative z-10">
+                        <h2 class="text-base font-semibold mb-2 text-emerald-800 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            Motor de Base de Datos (Google Sheets API)
+                        </h2>
+                        <p class="text-sm text-surface-600 mb-5 max-w-3xl">Conecta el ERP a tu Apps Script para sincronización automática. Sin URL, el sistema trabaja en modo local (datos guardados solo en este navegador).</p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end max-w-5xl">
+                            <div class="md:col-span-2">
+                                <label class="block text-[11px] font-semibold text-emerald-800 mb-1.5 uppercase tracking-wider">URL del Script (/exec)</label>
+                                <input type="url" id="config-db-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full rounded-xl border border-emerald-300 px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none shadow-sm bg-white transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-emerald-800 mb-1.5 uppercase tracking-wider">Clave de acceso (opcional)</label>
+                                <input type="password" id="config-db-token" autocomplete="off" placeholder="Igual a SECRET_TOKEN" class="w-full rounded-xl border border-emerald-300 px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none shadow-sm bg-white transition-all">
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-3 mt-4">
+                            <button type="button" onclick="app.saveDbUrl()" class="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-emerald-700 text-sm shadow-sm transition-transform active:scale-95 flex items-center justify-center gap-2">Conectar a la Nube</button>
+                            <button type="button" onclick="app.exportBackup()" class="bg-white border border-emerald-300 text-emerald-800 px-6 py-2.5 rounded-xl font-medium hover:bg-emerald-50 text-sm shadow-sm transition-transform active:scale-95">Descargar respaldo (.json)</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-surface-200 p-5 h-fit">
+                    <h2 class="text-[11px] font-semibold mb-4 text-surface-600 border-b border-surface-100 pb-2 uppercase tracking-widest">Maestro de Categorías</h2>
+                    <form id="form-category" onsubmit="app.saveCategory(event)" class="space-y-3">
+                        <div class="flex gap-2">
+                            <input type="text" id="cat-name" required maxlength="40" placeholder="Nombre (Ej. CAMISAS)" class="w-full uppercase-input rounded-xl border border-surface-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none shadow-sm transition-all bg-surface-50 focus:bg-white">
+                            <input type="text" id="cat-prefix" required maxlength="4" pattern="[A-Za-z0-9]{1,4}" placeholder="Pref (CAM)" class="w-24 uppercase-input rounded-xl border border-surface-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-center shadow-sm transition-all bg-surface-50 focus:bg-white" title="Máximo 4 letras o números">
+                        </div>
+                        <button type="submit" class="bg-surface-800 text-white w-full py-2 rounded-xl font-medium hover:bg-surface-900 text-sm shadow-sm transition-transform active:scale-95">Añadir Categoría</button>
+                    </form>
+                    <div class="mt-4 max-h-48 overflow-y-auto table-container border border-surface-100 rounded-xl">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-surface-50 text-[10px] font-semibold text-surface-500 uppercase tracking-widest border-b border-surface-100"><tr><th class="px-4 py-2 border-r border-surface-100">Nombre</th><th class="px-4 py-2 text-center">Prefijo</th></tr></thead>
+                            <tbody id="categories-tbody" class="divide-y divide-surface-100 text-surface-700 bg-white"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div class="bg-white rounded-2xl shadow-sm border border-surface-200 p-5">
+                        <h2 class="text-[11px] font-semibold mb-4 text-surface-600 uppercase tracking-widest border-b border-surface-100 pb-2">Diccionario Colores</h2>
+                        <form onsubmit="app.saveConfigItem('colors', 'color', event)" class="flex gap-2 mb-3">
+                            <input type="text" id="config-color" required maxlength="30" class="flex-1 min-w-0 uppercase-input text-sm border border-surface-300 px-3 py-2 rounded-xl outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 shadow-sm transition-all bg-surface-50 focus:bg-white">
+                            <button class="bg-surface-800 hover:bg-surface-900 text-white px-3 font-bold rounded-xl shadow-sm text-lg">+</button>
+                        </form>
+                        <ul id="list-colors" class="text-xs max-h-32 overflow-auto table-container space-y-1.5 p-1"></ul>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-sm border border-surface-200 p-5">
+                        <h2 class="text-[11px] font-semibold mb-4 text-surface-600 uppercase tracking-widest border-b border-surface-100 pb-2">Diccionario Tallas</h2>
+                        <form onsubmit="app.saveConfigItem('sizes', 'size', event)" class="flex gap-2 mb-3">
+                            <input type="text" id="config-size" required maxlength="30" class="flex-1 min-w-0 uppercase-input text-sm border border-surface-300 px-3 py-2 rounded-xl outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 shadow-sm transition-all bg-surface-50 focus:bg-white">
+                            <button class="bg-surface-800 hover:bg-surface-900 text-white px-3 font-bold rounded-xl shadow-sm text-lg">+</button>
+                        </form>
+                        <ul id="list-sizes" class="text-xs max-h-32 overflow-auto table-container space-y-1.5 p-1"></ul>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-sm border border-surface-200 p-5 sm:col-span-2">
+                        <h2 class="text-[11px] font-semibold mb-4 text-surface-600 uppercase tracking-widest border-b border-surface-100 pb-2">Métodos de Pago Autorizados</h2>
+                        <form onsubmit="app.saveConfigItem('payments', 'payment', event)" class="flex gap-2 mb-3">
+                            <input type="text" id="config-payment" required maxlength="30" class="flex-1 min-w-0 uppercase-input text-sm border border-surface-300 px-3 py-2 rounded-xl outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 shadow-sm transition-all bg-surface-50 focus:bg-white">
+                            <button class="bg-surface-800 hover:bg-surface-900 text-white px-4 font-bold rounded-xl shadow-sm text-lg">+</button>
+                        </form>
+                        <ul id="list-payments" class="text-xs max-h-24 overflow-auto table-container grid grid-cols-2 gap-2 p-1"></ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ================= MODALES ================= -->
+    <div id="modal-envio" class="hidden fixed inset-0 bg-surface-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden fade-in p-6 border border-surface-200">
+            <h3 class="text-lg font-bold text-surface-900 mb-4 border-b border-surface-100 pb-3 flex items-center gap-2">
+                <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Confirmar Despacho
+            </h3>
+            <form id="form-envio" onsubmit="app.confirmEnvio(event)" class="space-y-4">
+                <input type="hidden" id="envio-customer">
+                <div>
+                    <label class="block text-[11px] font-semibold text-surface-500 mb-2 uppercase tracking-wider">Selecciona las transacciones a despachar *</label>
+                    <div id="envio-products-list" class="space-y-2 max-h-48 overflow-y-auto pr-1 table-container"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 pt-2 border-t border-surface-100">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">F. Envío *</label>
+                        <input type="date" id="envio-date" required class="w-full rounded-xl border border-surface-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none shadow-sm cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">Tracking</label>
+                        <input type="text" id="envio-tracking" maxlength="60" class="w-full rounded-xl border border-surface-300 px-3 py-2 text-sm uppercase-input focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none shadow-sm">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 mt-6 pt-4 border-t border-surface-100">
+                    <button type="button" onclick="app.closeModal('modal-envio')" class="px-4 py-2 text-sm font-medium border border-surface-300 rounded-xl text-surface-600 hover:bg-surface-50 transition-colors">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 text-sm font-medium text-white bg-brand-600 rounded-xl hover:bg-brand-700 shadow-sm transition-transform active:scale-95">Despachar Selección</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-confirm-revert" class="hidden fixed inset-0 bg-surface-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden fade-in p-6 text-center border border-surface-200">
+            <div class="w-16 h-16 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-100">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
+            </div>
+            <h3 class="mb-4 text-sm font-bold text-surface-800" id="revert-msg">¿Revertir a PENDIENTE?</h3>
+            <input type="hidden" id="revert-customer">
+            <input type="hidden" id="revert-tx-key">
+            <div class="flex justify-center gap-2">
+                <button type="button" onclick="app.closeModal('modal-confirm-revert')" class="text-surface-600 font-medium border border-surface-300 rounded-xl px-4 py-2 text-sm hover:bg-surface-50 transition-colors">Cancelar</button>
+                <button type="button" onclick="app.confirmReversion()" class="text-white bg-amber-500 rounded-xl px-4 py-2 text-sm font-medium hover:bg-amber-600 shadow-sm transition-transform active:scale-95">Sí, Revertir</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-restock-exact" class="hidden fixed inset-0 bg-surface-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden fade-in border border-surface-200">
+            <div class="px-6 py-4 border-b border-surface-100 flex justify-between items-center bg-white">
+                <h3 class="text-base font-bold text-surface-900">+ Añadir Lote de Stock</h3>
+                <button type="button" onclick="app.closeModal('modal-restock-exact')" class="text-surface-400 hover:text-surface-600 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            </div>
+            <form id="form-restock-exact" onsubmit="app.confirmRestockExact(event)" class="p-6 space-y-4">
+                <input type="hidden" id="restock-exact-id">
+                <div class="bg-surface-50 border border-surface-200 p-3 rounded-xl">
+                    <label class="block text-[10px] font-semibold text-surface-500 mb-0.5 uppercase tracking-wider">Variante Destino</label>
+                    <input type="text" id="restock-exact-name" disabled class="w-full bg-transparent text-sm font-bold text-surface-800 outline-none border-none p-0">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">F. Compra *</label>
+                        <input type="date" id="restock-exact-date" required class="w-full rounded-xl border border-surface-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none shadow-sm cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-brand-600 mb-1.5 uppercase tracking-wider">Cant. Lote *</label>
+                        <input type="number" id="restock-exact-stock" min="1" step="1" required class="w-full rounded-xl border border-brand-200 bg-brand-50 px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none font-bold shadow-sm">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">Costo Total del Lote ($)</label>
+                        <input type="number" id="restock-exact-cost-total" step="0.01" min="0" class="w-full rounded-xl border border-surface-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none font-medium shadow-sm">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-4 border-t border-surface-100">
+                    <button type="button" onclick="app.closeModal('modal-restock-exact')" class="px-4 py-2 text-sm font-medium border border-surface-300 rounded-xl text-surface-600 hover:bg-surface-50">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 text-sm font-medium text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 shadow-sm transition-transform active:scale-95">Ingresar Lote</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-restock-var" class="hidden fixed inset-0 bg-surface-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden fade-in border border-surface-200">
+            <div class="px-6 py-4 border-b border-surface-100 flex justify-between items-center bg-white">
+                <h3 class="text-base font-bold text-surface-900">+ Nueva Variante de Producto</h3>
+                <button type="button" onclick="app.closeModal('modal-restock-var')" class="text-surface-400 hover:text-surface-600 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            </div>
+            <form onsubmit="app.confirmRestockVar(event)" class="p-6 space-y-4">
+                <input type="hidden" id="restock-var-id">
+                <div class="bg-surface-50 border border-surface-200 p-3 rounded-xl">
+                    <label class="block text-[10px] font-semibold text-surface-500 mb-0.5 uppercase tracking-wider">Familia Maestra</label>
+                    <input type="text" id="restock-var-name-display" disabled class="w-full bg-transparent text-sm font-bold text-surface-800 outline-none border-none p-0">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">Nuevo Color</label>
+                        <select id="restock-var-color" class="w-full uppercase-input rounded-xl border border-surface-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 bg-white outline-none shadow-sm cursor-pointer"></select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">Nueva Talla</label>
+                        <select id="restock-var-size" class="w-full uppercase-input rounded-xl border border-surface-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 bg-white outline-none shadow-sm cursor-pointer"></select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">F. Compra *</label>
+                        <input type="date" id="restock-var-date" required class="w-full rounded-xl border border-surface-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none shadow-sm cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-brand-600 mb-1.5 uppercase tracking-wider">Cant. Inicial *</label>
+                        <input type="number" id="restock-var-stock" min="1" step="1" required class="w-full rounded-xl border border-brand-200 bg-brand-50 px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 font-bold outline-none shadow-sm">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">Costo Total Lote ($)</label>
+                        <input type="number" id="restock-var-cost-total" step="0.01" min="0" class="w-full rounded-xl border border-surface-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none font-medium shadow-sm">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-4 border-t border-surface-100">
+                    <button type="button" onclick="app.closeModal('modal-restock-var')" class="px-4 py-2 text-sm font-medium border border-surface-300 text-surface-600 rounded-xl hover:bg-surface-50">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 text-sm font-medium text-white bg-brand-600 rounded-xl hover:bg-brand-700 shadow-sm transition-transform active:scale-95">Crear Variante</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-edit-inv" class="hidden fixed inset-0 bg-surface-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden fade-in border border-surface-200">
+            <div class="px-6 py-4 border-b border-surface-100 flex justify-between items-center bg-white">
+                <h3 class="text-base font-bold text-surface-900">Editor de Registro</h3>
+                <button type="button" onclick="app.closeModal('modal-edit-inv')" class="text-surface-400 hover:text-surface-600 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            </div>
+            <form onsubmit="app.confirmEditInv(event)" class="p-6 space-y-5">
+                <input type="hidden" id="edit-inv-id">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2 border border-surface-200 p-4 rounded-xl bg-surface-50/50">
+                        <p class="text-[10px] text-brand-600 mb-3 font-bold uppercase tracking-wider">Datos de Familia</p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-semibold text-surface-500 mb-1 uppercase tracking-wider">Código Fijo</label>
+                                <input type="text" id="edit-inv-code" disabled class="w-full rounded-lg border border-surface-200 bg-surface-100 px-3 py-1.5 text-xs font-bold text-surface-400 outline-none cursor-not-allowed">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-semibold text-surface-500 mb-1 uppercase tracking-wider">Categoría Fija</label>
+                                <select id="edit-inv-category" disabled class="w-full uppercase-input rounded-lg border border-surface-200 bg-surface-100 px-3 py-1.5 text-xs text-surface-400 outline-none shadow-sm cursor-not-allowed"></select>
+                            </div>
+                            <div class="col-span-2">
+                                <label class="block text-[10px] font-semibold text-surface-500 mb-1 uppercase tracking-wider">Nombre Maestro (Modificable)</label>
+                                <input type="text" id="edit-inv-name" required maxlength="80" class="w-full uppercase-input rounded-lg border border-surface-300 px-3 py-1.5 text-xs focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none shadow-sm">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-span-2 border-t border-surface-100 pt-1">
+                        <p class="text-[10px] text-amber-600 font-bold mb-2 uppercase tracking-wider">Datos Específicos del Lote</p>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">Color Variante</label>
+                        <select id="edit-inv-color" class="w-full uppercase-input rounded-xl border border-surface-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 bg-white outline-none shadow-sm cursor-pointer"></select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">Talla Variante</label>
+                        <select id="edit-inv-size" class="w-full uppercase-input rounded-xl border border-surface-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 bg-white outline-none shadow-sm cursor-pointer"></select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">F. Compra *</label>
+                        <input type="date" id="edit-inv-date" required class="w-full rounded-xl border border-surface-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none shadow-sm cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-brand-600 mb-1.5 uppercase tracking-wider">Cant. Inicial *</label>
+                        <input type="number" id="edit-inv-stock" min="0" step="1" required class="w-full rounded-xl border border-brand-200 bg-brand-50 px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 font-bold outline-none shadow-sm">
+                        <p class="text-[9px] text-surface-400 mt-1">Límite inf. depende de ventas.</p>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">Costo Total ($)</label>
+                        <input type="number" id="edit-inv-cost-total" step="0.01" min="0" class="w-full rounded-xl border border-surface-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none font-medium shadow-sm">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-4 border-t border-surface-100">
+                    <button type="button" onclick="app.closeModal('modal-edit-inv')" class="px-4 py-2 text-sm font-medium border border-surface-300 text-surface-600 rounded-xl hover:bg-surface-50">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 text-sm font-medium text-white bg-amber-500 rounded-xl hover:bg-amber-600 shadow-sm transition-transform active:scale-95">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-edit-sale" class="hidden fixed inset-0 bg-surface-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden fade-in p-6 border border-surface-200">
+            <h3 class="text-base font-bold text-surface-900 mb-4 border-b border-surface-100 pb-3 flex items-center gap-2">
+                <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg> Corregir Transacción
+            </h3>
+            <form onsubmit="app.confirmEditSale(event)" class="space-y-4">
+                <input type="hidden" id="edit-sale-id">
+                <div>
+                    <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">Fecha de Venta</label>
+                    <input type="date" id="edit-sale-date" required class="w-full rounded-xl border border-surface-300 px-3 py-2 text-base focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none shadow-sm cursor-pointer mb-4">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">Nueva Cant. Vendida</label>
+                    <input type="number" id="edit-sale-qty" min="1" step="1" required class="w-full rounded-xl border border-surface-300 px-3 py-2 text-base font-bold focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none shadow-sm text-center">
+                    <p class="text-[10px] text-surface-500 mt-2 bg-surface-50 p-2 rounded-lg border border-surface-100">FIFO recalculará existencias automáticamente.</p>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-semibold text-brand-600 mb-1.5 uppercase tracking-wider">Total Cobrado Final ($)</label>
+                    <input type="number" id="edit-sale-total" step="0.01" min="0" required class="w-full rounded-xl border border-brand-200 bg-brand-50 px-3 py-2 text-base font-bold text-brand-800 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none shadow-sm text-center">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-semibold text-surface-500 mb-1.5 uppercase tracking-wider">Medio Pago</label>
+                    <select id="edit-sale-payment" class="w-full uppercase-input rounded-xl border border-surface-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 bg-white outline-none shadow-sm cursor-pointer"></select>
+                </div>
+                <div class="flex justify-end gap-2 pt-4 border-t border-surface-100">
+                    <button type="button" onclick="app.closeModal('modal-edit-sale')" class="px-4 py-2 text-sm font-medium border border-surface-300 text-surface-600 rounded-xl hover:bg-surface-50">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 text-sm font-medium text-white bg-amber-500 rounded-xl hover:bg-amber-600 shadow-sm transition-transform active:scale-95">Aplicar Corrección</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-delete-sale" class="hidden fixed inset-0 bg-surface-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden fade-in text-center p-6 border border-surface-200">
+            <div class="w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-rose-100">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </div>
+            <h3 class="mb-2 text-base font-bold text-surface-900 tracking-tight">¿Anular transacción?</h3>
+            <p class="mb-5 text-xs text-surface-500 leading-relaxed">El stock retornará intacto al inventario. Contabilidad tachará el registro.</p>
+            <input type="hidden" id="delete-sale-id">
+            <div class="flex justify-center gap-2">
+                <button type="button" onclick="app.closeModal('modal-delete-sale')" class="text-surface-600 font-medium border border-surface-300 rounded-xl px-5 py-2 text-sm hover:bg-surface-50 transition-colors">Mantener</button>
+                <button type="button" onclick="app.confirmDeleteSale()" class="text-white bg-rose-600 rounded-xl px-5 py-2 text-sm font-medium hover:bg-rose-700 shadow-sm transition-transform active:scale-95">Sí, Anular</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="global-loader" class="hidden fixed inset-0 bg-surface-900/90 z-[100] flex flex-col items-center justify-center text-white backdrop-blur-md transition-opacity">
+        <div class="relative w-16 h-16 mb-6">
+            <svg class="animate-spin absolute inset-0 w-full h-full text-brand-400/20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle></svg>
+            <svg class="animate-spin absolute inset-0 w-full h-full text-white" viewBox="0 0 24 24"><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+        </div>
+        <h2 class="text-xl font-bold tracking-widest mb-2 drop-shadow-sm">SINCRONIZANDO</h2>
+        <p class="text-xs font-medium text-surface-300 uppercase tracking-widest bg-surface-800 px-4 py-1.5 rounded-lg border border-surface-700" id="loader-msg">Cloud Sync</p>
+        <button onclick="document.getElementById('global-loader').classList.add('hidden')" class="mt-8 text-xs text-surface-500 hover:text-white underline">Cerrar si se quedó pegado</button>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[110] flex flex-col gap-3"></div>
+
+    <script>
+    'use strict';
+    const app = {
+        data: null,
+        cloudReady: false,   // true solo si la nube se leyó correctamente (evita sobrescribirla con datos vacíos)
+        saving: false,
+        pending: false,
+        openRows: new Set(),
+        pagination: { inventory: 1, sales: 1, clientes: 1, gastos: 1, perPage: 15 },
+        rowCounter: 0,
+        charts: {},
+        KEY_URL: 'inventoSysConfigUrl',
+        KEY_TOKEN: 'inventoSysToken',
+        KEY_BACKUP: 'inventoSysBackup',
+
+        /* ---------- Utilidades ---------- */
+        generateId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 10); },
+        esc(s) { return String(s === undefined || s === null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); },
+        // Literal JS seguro para usar dentro de atributos onclick="..."
+        jsq(v) { return this.esc(JSON.stringify(String(v === undefined || v === null ? '' : v))); },
+        pad2(n) { return String(n).padStart(2, '0'); },
+        todayISO() { const d = new Date(); return `${d.getFullYear()}-${this.pad2(d.getMonth() + 1)}-${this.pad2(d.getDate())}`; },
+        // Evita el desfase de zona horaria: 'YYYY-MM-DD' se interpreta en hora LOCAL (no UTC)
+        parseDate(s) {
+            if (!s || s === 'SIN_FECHA') return null;
+            if (s instanceof Date) return isNaN(s) ? null : s;
+            if (/^\d{4}-\d{2}-\d{2}$/.test(s)) { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }
+            const d = new Date(s); return isNaN(d) ? null : d;
+        },
+        dayStart(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); },
+        daysBetween(later, earlier) { return Math.round((this.dayStart(later) - this.dayStart(earlier)) / 86400000); },
+        formatDate(s) {
+            const d = this.parseDate(s); if (!d) return (s && s !== 'SIN_FECHA') ? this.esc(s) : '-';
+            return `${this.pad2(d.getDate())}/${this.pad2(d.getMonth() + 1)}/${d.getFullYear()}`;
+        },
+        formatDateTime(s) {
+            const d = this.parseDate(s); if (!d) return '-';
+            return `${this.formatDate(d)} ${this.pad2(d.getHours())}:${this.pad2(d.getMinutes())}`;
+        },
+        money(n) { return '$' + (Number(n) || 0).toFixed(2); },
+        cleanPhone(s) { return String(s || '').replace(/\D/g, ''); },
+        waLink(num) { const d = this.cleanPhone(num); return 'https://wa.me/' + (d.length === 9 ? '51' + d : d); },
+        txKey(s) { return s.groupId || (s.createdAt + '_' + s.itemCode); },
+        vKey(i) { return `${i.code}|${i.color || '-'}|${i.size || '-'}`; },
+        sameVariant(i, code, color, size) { return i.code === code && (i.color || '-') === color && (i.size || '-') === size; },
+        // FIFO: primero el lote comprado antes
+        fifoSort(a, b) { return String(a.date || a.createdAt || '').localeCompare(String(b.date || b.createdAt || '')) || String(a.createdAt || '').localeCompare(String(b.createdAt || '')); },
+        activeBatches(code, color, size) {
+            return this.data.inventory.filter(i => this.sameVariant(i, code, color, size) && i.stock > 0 && i.status !== 'CANCELLED').sort((a, b) => this.fifoSort(a, b));
+        },
+        variantStock(code, color, size) {
+            return this.data.inventory.filter(i => this.sameVariant(i, code, color, size) && i.status !== 'CANCELLED').reduce((a, c) => a + c.stock, 0);
+        },
+        $(id) { return document.getElementById(id); },
+
+        /* ---------- Datos ---------- */
+        emptyData() {
+            return {
+                categories: [{ id: this.generateId(), name: 'CAMISAS', prefix: 'CAM', counter: 0 }],
+                colors: [{ id: this.generateId(), name: 'NEGRO' }],
+                sizes: [{ id: this.generateId(), name: 'M' }],
+                payments: [{ id: this.generateId(), name: 'EFECTIVO' }],
+                inventory: [], sales: [], gastos: []
+            };
+        },
+        normalize(raw) {
+            const keys = ['categories', 'colors', 'sizes', 'payments', 'inventory', 'sales', 'gastos'];
+            const out = {};
+            keys.forEach(k => { out[k] = Array.isArray(raw && raw[k]) ? raw[k] : []; });
+            out.inventory.forEach(i => { if (i.initialStock === undefined) i.initialStock = i.stock; if (!i.status) i.status = 'ACTIVE'; });
+            out.sales.forEach(s => { if (!s.status) s.status = 'ACTIVE'; if (!s.shippingStatus) s.shippingStatus = 'PENDING'; if (!s.groupId) s.groupId = s.createdAt + '_' + s.itemCode; });
+            return out;
+        },
+
+        init() {
+            this.data = this.emptyData();
+            const today = this.todayISO();
+            this.$('global-sale-date').value = today;
+            this.$('gasto-date').value = today;
+            this.$('inv-date').value = today;
+
+            // Mayúsculas automáticas conservando el cursor
+            document.addEventListener('input', (e) => {
+                const t = e.target;
+                if (!t || t.tagName === 'SELECT' || !t.classList || !t.classList.contains('uppercase-input')) return;
+                if (typeof t.value !== 'string') return;
+                const up = t.value.toUpperCase();
+                if (up === t.value) return;
+                try { const s = t.selectionStart, en = t.selectionEnd; t.value = up; t.setSelectionRange(s, en); } catch (err) { t.value = up; }
+            });
+            // Solo dígitos en el WhatsApp
+            this.$('global-sale-customer').addEventListener('input', (e) => { e.target.value = this.cleanPhone(e.target.value); });
+            // Cierra los buscadores de producto al hacer clic fuera (un único listener)
+            document.addEventListener('click', (e) => {
+                document.querySelectorAll('[id^="dropdown-"]').forEach(d => { if (!d.parentElement.contains(e.target)) d.classList.add('hidden'); });
+            });
+            // Escape cierra modales
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') document.querySelectorAll('[id^="modal-"]:not(.hidden)').forEach(m => this.closeModal(m.id));
+            });
+            window.addEventListener('beforeunload', (e) => { if (this.saving || this.pending) { e.preventDefault(); e.returnValue = ''; } });
+
+            const url = localStorage.getItem(this.KEY_URL);
+            this.$('config-db-token').value = localStorage.getItem(this.KEY_TOKEN) || '';
+            if (url) {
+                this.$('config-db-url').value = url;
+                this.loadFromCloud(url);
+            } else {
+                // Modo local: recupera el respaldo del navegador
+                try {
+                    const bk = localStorage.getItem(this.KEY_BACKUP);
+                    if (bk) this.data = this.normalize(JSON.parse(bk));
+                } catch (e) { /* respaldo corrupto: se ignora */ }
+                this.setSync('local');
+                this.renderAll();
+                this.switchTab('config');
+                this.showToast('Modo local. Configura la URL de Apps Script para operar en la nube.', 'info');
+            }
+        },
+
+        /* ---------- Sincronización ---------- */
+        setSync(state) {
+            const map = {
+                local: ['bg-amber-400', 'Modo local'], ok: ['bg-emerald-400', 'Sincronizado'], saving: ['bg-brand-400', 'Guardando...'],
+                error: ['bg-rose-500', 'Error de sync'], offline: ['bg-surface-500', 'Sin conexión']
+            };
+            const [cls, txt] = map[state] || map.offline;
+            const dot = this.$('sync-dot'); dot.className = 'w-2 h-2 rounded-full ' + cls;
+            this.$('sync-text').textContent = txt;
+        },
+        syncUrl(base) {
+            const token = localStorage.getItem(this.KEY_TOKEN) || '';
+            return token ? base + (base.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(token) : base;
+        },
+        saveData() {
+            const url = localStorage.getItem(this.KEY_URL);
+            if (!url) {
+                try { localStorage.setItem(this.KEY_BACKUP, JSON.stringify(this.data)); } catch (e) { this.showToast('No se pudo guardar el respaldo local (almacenamiento lleno).', 'error'); }
+                this.setSync('local'); return;
+            }
+            if (!this.cloudReady) { this.showToast('Sin conexión con la nube: el cambio NO se guardó. Revisa Ajustes.', 'error'); this.setSync('error'); return; }
+            try { localStorage.setItem(this.KEY_BACKUP, JSON.stringify(this.data)); } catch (e) { /* no crítico */ }
+            this.flushSave();
+        },
+        // Cola serializada: nunca hay dos POST simultáneos; si hubo cambios mientras se guardaba, se reenvía el estado más reciente
+        flushSave() {
+            if (this.saving) { this.pending = true; return; }
+            const url = localStorage.getItem(this.KEY_URL); if (!url) return;
+            this.saving = true; this.pending = false; this.setSync('saving');
+            fetch(this.syncUrl(url), {
+                method: 'POST', mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(this.data)
+            }).then(() => { if (!this.pending) this.setSync('ok'); })
+              .catch(() => { this.setSync('error'); this.showToast('Red inestable: no se pudo sincronizar. Se reintentará con el próximo cambio.', 'error'); })
+              .finally(() => { this.saving = false; if (this.pending) this.flushSave(); });
+        },
+        loadFromCloud(url) {
+            if (!url.endsWith('/exec')) { this.showToast('Seguridad: la URL debe terminar en /exec', 'error'); this.switchTab('config'); return; }
+            const loader = this.$('global-loader');
+            this.$('loader-msg').textContent = 'Descargando Estructura...';
+            loader.classList.remove('hidden');
+            this.cloudReady = false;
+
+            fetch(this.syncUrl(url))
+                .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.text(); })
+                .then(text => {
+                    let cloud;
+                    try { cloud = JSON.parse(text); } catch (e) { throw new Error('html'); }
+                    if (cloud && cloud.status === 'error') {
+                        this.setSync('error');
+                        this.showToast(cloud.message === 'unauthorized' ? 'Clave de acceso incorrecta.' : 'El servidor devolvió un error: ' + (cloud.message || ''), 'error');
+                        this.switchTab('config'); return;
+                    }
+                    const fresh = !cloud || (!(cloud.categories || []).length && !(cloud.payments || []).length && !(cloud.inventory || []).length && !(cloud.sales || []).length);
+                    this.data = this.normalize(cloud);
+                    this.cloudReady = true;
+                    if (fresh) { this.data = this.emptyData(); this.saveData(); this.showToast('Base nueva: se creó la estructura inicial.', 'info'); }
+                    else this.showToast('Sistema en línea');
+                    this.setSync('ok');
+                    this.renderAll(); this.switchTab('inventory');
+                })
+                .catch(err => {
+                    this.setSync('error');
+                    this.showToast(err.message === 'html' ? 'El servidor respondió HTML: revisa que el acceso sea "Cualquier usuario" y la URL /exec.' : 'Error de conexión. Verifica la URL y los permisos.', 'error');
+                    this.switchTab('config');
+                })
+                .finally(() => loader.classList.add('hidden'));
+        },
+        saveDbUrl() {
+            const url = this.$('config-db-url').value.trim();
+            if (!url) {
+                if (confirm('¿Desconectar la nube y trabajar en modo local?')) { localStorage.removeItem(this.KEY_URL); this.cloudReady = false; this.setSync('local'); this.showToast('Modo local activado.', 'info'); }
+                return;
+            }
+            if (!url.endsWith('/exec')) return this.showToast('URL debe finalizar en /exec', 'error');
+            localStorage.setItem(this.KEY_URL, url);
+            localStorage.setItem(this.KEY_TOKEN, this.$('config-db-token').value.trim());
+            this.loadFromCloud(url);
+        },
+        exportBackup() {
+            const blob = new Blob([JSON.stringify(this.data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+            a.download = `inventosys-respaldo-${this.todayISO()}.json`; document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        },
+
+        /* ---------- UI general ---------- */
+        showToast(message, type = 'success') {
+            const container = this.$('toast-container'), toast = document.createElement('div');
+            const bg = type === 'success' ? 'bg-emerald-600' : (type === 'error' ? 'bg-rose-600' : 'bg-surface-800');
+            toast.className = `${bg} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 fade-in transform transition-all duration-300 z-[120] text-sm font-medium max-w-sm`;
+            toast.textContent = message; container.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, type === 'error' ? 5000 : 3000);
+        },
+        switchTab(tabId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(el => { el.classList.remove('text-white', 'bg-surface-700'); el.classList.add('text-surface-300'); });
+            this.$(`view-${tabId}`).classList.remove('hidden');
+            const btn = this.$(`nav-${tabId}`);
+            if (btn) { btn.classList.add('text-white', 'bg-surface-700'); btn.classList.remove('text-surface-300'); }
+            const mn = this.$('mobile-nav'); if (mn.value !== tabId) mn.value = tabId;
+            if (tabId === 'sales' && document.querySelectorAll('.sale-row').length === 0) this.addSaleRow();
+            else if (tabId === 'reportes') this.renderReportes();
+            else if (tabId === 'seguimiento') this.renderSeguimiento();
+        },
+        changePage(section, page) {
+            if (page < 1) page = 1;
+            this.pagination[section] = page;
+            if (section === 'inventory') this.renderInventory();
+            if (section === 'sales') this.renderSales();
+            if (section === 'clientes') this.renderClientes();
+            if (section === 'gastos') this.renderGastos();
+        },
+        paginate(section, arr) {
+            const per = this.pagination.perPage, total = Math.max(1, Math.ceil(arr.length / per));
+            if (this.pagination[section] > total) this.pagination[section] = total;
+            const cur = this.pagination[section];
+            const c = this.$(`${section}-pagination`);
+            if (c) c.innerHTML = `
+                <span class="text-[11px] text-surface-500 font-medium uppercase tracking-wider">Mostrando ${arr.length === 0 ? 0 : ((cur - 1) * per + 1)}-${Math.min(cur * per, arr.length)} de ${arr.length}</span>
+                <div class="flex gap-2">
+                    <button onclick="app.changePage('${section}', ${cur - 1})" ${cur === 1 ? 'disabled' : ''} class="px-3 py-1 border border-surface-300 rounded-lg bg-white text-xs font-medium text-surface-600 disabled:opacity-40 hover:bg-surface-50 transition-colors">Ant</button>
+                    <span class="px-3 py-1 text-xs font-medium text-surface-600">${cur} / ${total}</span>
+                    <button onclick="app.changePage('${section}', ${cur + 1})" ${cur === total ? 'disabled' : ''} class="px-3 py-1 border border-surface-300 rounded-lg bg-white text-xs font-medium text-surface-600 disabled:opacity-40 hover:bg-surface-50 transition-colors">Sig</button>
+                </div>`;
+            return arr.slice((cur - 1) * per, cur * per);
+        },
+        renderAll() {
+            this.renderCategories(); this.renderConfigLists(); this.updateDropdowns();
+            this.renderInventory(); this.renderSales(); this.renderClientes(); this.renderGastos();
+        },
+        refreshAfterSaleChange() { this.renderInventory(); this.renderSales(); this.renderClientes(); this.renderReportes(); },
+        closeModal(id) {
+            const mod = this.$(id); mod.classList.add('hidden');
+            const form = mod.querySelector('form'); if (form) form.reset();
+        },
+        // Mantiene abiertos los acordeones tras cada re-render
+        toggleRow(id, event) {
+            if (event) {
+                const t = event.target;
+                const tag = t.tagName.toLowerCase();
+                if (tag === 'button' || tag === 'input' || tag === 'select' || tag === 'a' || t.closest('button') || t.closest('a')) return;
+            }
+            const el = this.$(id); if (!el) return;
+            if (el.classList.contains('hidden')) this.setRowOpen(id, true); else this.setRowOpen(id, false);
+        },
+        setRowOpen(id, open) {
+            const el = this.$(id), icon = this.$(`icon-${id}`); if (!el) return;
+            if (open) { el.classList.remove('hidden'); el.classList.add('slide-down'); if (icon) icon.style.transform = 'rotate(180deg)'; this.openRows.add(id); }
+            else { el.classList.add('hidden'); el.classList.remove('slide-down'); if (icon) icon.style.transform = 'rotate(0deg)'; this.openRows.delete(id); }
+        },
+        restoreOpenRows() { this.openRows.forEach(id => { if (this.$(id)) this.setRowOpen(id, true); else this.openRows.delete(id); }); },
+        safeId(prefix, ...parts) { return prefix + parts.map(p => String(p === undefined || p === null ? '' : p).replace(/\W/g, '')).join('-'); },
+        emptyRow(cols, msg = 'Vacío o sin coincidencias') { return `<tr><td colspan="${cols}" class="text-center py-10 text-surface-400 text-xs uppercase tracking-widest bg-surface-50/50">${msg}</td></tr>`; },
+        chevron(id) { return `<svg id="icon-${id}" class="w-4 h-4 text-surface-400 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`; },
+
+        /* ---------- INVENTARIO ---------- */
+        saveInventory(e) {
+            e.preventDefault();
+            const catId = this.$('inv-category').value, cat = this.data.categories.find(c => c.id === catId);
+            if (!cat) return this.showToast('Selecciona una categoría.', 'error');
+            const stock = parseInt(this.$('inv-stock').value, 10);
+            if (!(stock >= 1)) return this.showToast('Cantidad inválida.', 'error');
+            const costTotal = parseFloat(this.$('inv-cost-total').value) || 0;
+            cat.counter = (cat.counter || 0) + 1;
+            const code = `${cat.prefix}-${String(cat.counter).padStart(4, '0')}`;
+            this.data.inventory.push({
+                id: this.generateId(), createdAt: new Date().toISOString(), code, categoryId: catId, categoryName: cat.name,
+                name: this.$('inv-name').value.trim().toUpperCase(), color: this.$('inv-color').value || '-', size: this.$('inv-size').value || '-',
+                initialStock: stock, stock, date: this.$('inv-date').value,
+                costUnit: costTotal / stock, costTotal, status: 'ACTIVE'
+            });
+            this.saveData(); this.renderInventory();
+            this.$('form-inventory').reset(); this.$('inv-date').value = this.todayISO();
+            this.showToast(`Familia creada: ${code}`);
+        },
+        renderInventory() {
+            const tb = this.$('inventory-tbody'), term = this.$('search-inventory').value.toLowerCase().trim();
+            const dType = this.$('inv-date-type').value, dStart = this.$('inv-date-start').value, dEnd = this.$('inv-date-end').value;
+            const filt = this.data.inventory.filter(i => {
+                const mT = term === '' || `${i.name || ''} ${i.code || ''} ${i.categoryName || ''} ${i.color || ''} ${i.size || ''}`.toLowerCase().includes(term);
+                let mD = true;
+                if (dStart || dEnd) { const tD = dType === 'registro' ? (i.createdAt || '').split('T')[0] : (i.date || ''); if (dStart && tD < dStart) mD = false; if (dEnd && tD > dEnd) mD = false; }
+                return mT && mD;
+            });
+
+            const gMap = new Map();
+            filt.forEach(b => {
+                const code = b.code || '';
+                if (!gMap.has(code)) gMap.set(code, { code, name: b.name, cat: b.categoryName, tStk: 0, refId: b.id, vars: new Map() });
+                const g = gMap.get(code); if (b.status !== 'CANCELLED') g.tStk += b.stock;
+                const vK = `${b.color || '-'}_${b.size || '-'}`;
+                if (!g.vars.has(vK)) g.vars.set(vK, { color: b.color || '-', size: b.size || '-', stk: 0, refId: b.id, bats: [] });
+                const v = g.vars.get(vK); v.bats.push(b); if (b.status !== 'CANCELLED') v.stk += b.stock;
+            });
+
+            const gArr = Array.from(gMap.values()).sort((a, b) => (b.code || '').localeCompare(a.code || ''));
+            const iShow = this.paginate('inventory', gArr);
+            if (iShow.length === 0) { tb.innerHTML = this.emptyRow(2); return; }
+
+            let html = '';
+            iShow.forEach(g => {
+                const sGId = this.safeId('grp-', g.code);
+                let vHtml = '';
+                Array.from(g.vars.values()).sort((a, b) => (a.color || '').localeCompare(b.color || '')).forEach(v => {
+                    let bHtml = '';
+                    v.bats.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)).forEach(b => {
+                        const isC = b.status === 'CANCELLED';
+                        const tC = isC ? 'bg-rose-50/50 text-surface-400 opacity-70' : 'bg-white hover:bg-surface-50 transition-colors';
+                        const init = b.initialStock !== undefined ? b.initialStock : b.stock;
+                        const acts = isC
+                            ? `<button onclick="app.restoreInventory(${this.jsq(b.id)})" class="text-[10px] bg-emerald-50 text-emerald-700 px-3 py-1 rounded border border-emerald-200 font-medium hover:bg-emerald-100 uppercase tracking-widest">Restaurar</button>`
+                            : `<button onclick="app.openEditInv(${this.jsq(b.id)})" class="text-[10px] bg-surface-50 text-surface-600 px-2 py-1 rounded border border-surface-200 font-medium hover:bg-surface-100 uppercase tracking-widest">Editar</button><button onclick="app.cancelInventory(${this.jsq(b.id)})" class="text-[10px] bg-rose-50 text-rose-600 px-2 py-1 rounded border border-rose-200 font-medium hover:bg-rose-100 uppercase tracking-widest">Anular</button>`;
+                        bHtml += `<div class="flex justify-between items-center py-3 border-b border-surface-100 last:border-0 text-xs px-5 ${tC}"><div class="grid grid-cols-5 gap-4 flex-1"><div><span class="text-[9px] text-surface-400 uppercase tracking-widest block">F. Compra</span><span class="font-medium">${this.formatDate(b.date)}</span></div><div><span class="text-[9px] text-surface-400 uppercase tracking-widest block">F. Sistema</span><span class="font-medium">${this.formatDateTime(b.createdAt)}</span></div><div><span class="text-[9px] text-surface-400 uppercase tracking-widest block">Costo Lote</span><span class="font-medium">${this.money(b.costTotal)}</span></div><div><span class="text-[9px] text-surface-400 uppercase tracking-widest block">Cant. Inicial</span><span class="font-medium">${init}</span></div><div><span class="text-[9px] text-brand-500 uppercase tracking-widest block">Físico Disp.</span><span class="font-bold text-sm ${isC ? '' : 'text-brand-600'}">${isC ? 0 : b.stock}</span></div></div><div class="flex gap-1.5 shrink-0 ml-4">${acts}</div></div>`;
+                    });
+                    const vId = this.safeId(sGId + '-', v.color, v.size);
+                    const badge = v.stk <= 0 ? 'bg-rose-50 text-rose-600' : (v.stk <= 5 ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600');
+                    vHtml += `<div class="mb-3 border border-surface-200 rounded-xl overflow-hidden shadow-sm"><div class="bg-white px-4 py-3 flex justify-between items-center cursor-pointer hover:bg-surface-50 transition-colors" onclick="app.toggleRow('${vId}', event)"><div class="flex items-center gap-4"><div class="text-xs font-semibold text-surface-700 bg-surface-100 px-3 py-1 rounded-md"><span class="text-surface-400 uppercase tracking-widest text-[10px] mr-1">Color</span> ${this.esc(v.color)} <span class="text-surface-300 mx-2">|</span> <span class="text-surface-400 uppercase tracking-widest text-[10px] mr-1">Talla</span> ${this.esc(v.size)}</div><span class="text-[10px] font-bold px-2 py-1 rounded uppercase tracking-widest ${badge}">Disp: <span class="text-xs">${v.stk}</span></span></div><div class="flex gap-3 items-center"><button onclick="app.openRestockExact(${this.jsq(v.refId)}); event.stopPropagation();" class="text-[10px] bg-white border border-surface-300 shadow-sm text-surface-700 px-3 py-1.5 rounded-lg hover:bg-surface-50 hover:text-brand-600 font-semibold uppercase tracking-widest">+ Stock Lote</button>${this.chevron(vId)}</div></div><div id="${vId}" class="hidden border-t border-surface-100 bg-surface-50">${bHtml}</div></div>`;
+                });
+
+                html += `<tr class="hover:bg-surface-50/50 border-b border-surface-200 cursor-pointer transition-colors" onclick="app.toggleRow('${sGId}', event)"><td class="px-6 py-4 bg-white border-r border-surface-100"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600 font-bold shadow-sm"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg></div><div><span class="font-mono font-bold text-surface-900 block leading-tight">${this.esc(g.code)}</span><span class="font-medium text-surface-600 text-xs block">${this.esc(g.name)}</span><span class="text-[9px] font-semibold text-surface-400 bg-surface-100 px-1.5 py-0.5 rounded uppercase tracking-widest mt-1 inline-block">${this.esc(g.cat)}</span></div></div></td><td class="px-6 py-4 bg-surface-50/30"><div class="flex items-center justify-end gap-6"><div class="text-right"><span class="text-[9px] text-surface-400 font-semibold uppercase tracking-widest block">Total Consolidado</span><span class="text-xl font-bold ${g.tStk <= 0 ? 'text-rose-500' : 'text-brand-600'}">${g.tStk}</span></div><button onclick="app.openRestockVar(${this.jsq(g.refId)}); event.stopPropagation();" class="bg-white text-surface-600 border border-surface-300 px-3 py-2 rounded-xl text-[10px] font-semibold hover:bg-surface-50 hover:text-brand-600 shadow-sm uppercase tracking-widest">+ Nueva Variante</button>${this.chevron(sGId)}</div></td></tr><tr id="${sGId}" class="hidden"><td colspan="2" class="p-6 bg-surface-100/50 border-b-2 border-brand-100 shadow-inner">${vHtml}</td></tr>`;
+            });
+            tb.innerHTML = html;
+            this.restoreOpenRows();
+        },
+        cancelInventory(id) {
+            const i = this.data.inventory.find(x => x.id === id); if (!i) return;
+            if (i.stock < (i.initialStock !== undefined ? i.initialStock : i.stock) && !confirm('Este lote ya tiene ventas. Al anularlo su stock restante dejará de estar disponible. ¿Continuar?')) return;
+            i.status = 'CANCELLED'; this.saveData(); this.renderInventory(); this.renderReportes(); this.showToast('Lote anulado.');
+        },
+        restoreInventory(id) { const i = this.data.inventory.find(x => x.id === id); if (i) { i.status = 'ACTIVE'; this.saveData(); this.renderInventory(); this.renderReportes(); this.showToast('Lote restaurado.'); } },
+
+        openRestockExact(id) {
+            const i = this.data.inventory.find(x => x.id === id); if (!i) return;
+            this.$('form-restock-exact').reset();
+            this.$('restock-exact-id').value = i.id; this.$('restock-exact-name').value = `${i.code} | ${i.color} | ${i.size}`;
+            this.$('restock-exact-date').value = this.todayISO();
+            this.$('modal-restock-exact').classList.remove('hidden');
+        },
+        confirmRestockExact(e) {
+            e.preventDefault();
+            const i = this.data.inventory.find(x => x.id === this.$('restock-exact-id').value); if (!i) return;
+            const stk = parseInt(this.$('restock-exact-stock').value, 10); if (!(stk >= 1)) return this.showToast('Cantidad inválida.', 'error');
+            const ct = parseFloat(this.$('restock-exact-cost-total').value) || 0;
+            this.data.inventory.push({
+                id: this.generateId(), createdAt: new Date().toISOString(), code: i.code, categoryId: i.categoryId, categoryName: i.categoryName, name: i.name,
+                color: i.color, size: i.size, initialStock: stk, stock: stk, date: this.$('restock-exact-date').value, costUnit: ct / stk, costTotal: ct, status: 'ACTIVE'
+            });
+            this.saveData(); this.renderInventory(); this.closeModal('modal-restock-exact'); this.showToast('Lote agregado.');
+        },
+        openRestockVar(id) {
+            const i = this.data.inventory.find(x => x.id === id); if (!i) return;
+            this.$('modal-restock-var').querySelector('form').reset();
+            this.$('restock-var-id').value = i.id; this.$('restock-var-name-display').value = `[${i.code}] ${i.name}`;
+            this.$('restock-var-date').value = this.todayISO();
+            this.updateDropdowns(); this.$('modal-restock-var').classList.remove('hidden');
+        },
+        confirmRestockVar(e) {
+            e.preventDefault();
+            const i = this.data.inventory.find(x => x.id === this.$('restock-var-id').value); if (!i) return;
+            const stk = parseInt(this.$('restock-var-stock').value, 10); if (!(stk >= 1)) return this.showToast('Cantidad inválida.', 'error');
+            const ct = parseFloat(this.$('restock-var-cost-total').value) || 0;
+            this.data.inventory.push({
+                id: this.generateId(), createdAt: new Date().toISOString(), code: i.code, categoryId: i.categoryId, categoryName: i.categoryName, name: i.name,
+                color: this.$('restock-var-color').value || '-', size: this.$('restock-var-size').value || '-', initialStock: stk, stock: stk,
+                date: this.$('restock-var-date').value, costUnit: ct / stk, costTotal: ct, status: 'ACTIVE'
+            });
+            this.saveData(); this.renderInventory(); this.closeModal('modal-restock-var'); this.showToast('Variante creada.');
+        },
+        openEditInv(id) {
+            const i = this.data.inventory.find(x => x.id === id); if (!i) return; this.updateDropdowns();
+            this.$('edit-inv-id').value = i.id; this.$('edit-inv-code').value = i.code;
+            this.$('edit-inv-name').value = i.name; this.$('edit-inv-category').value = i.categoryId || '';
+            this.$('edit-inv-color').value = i.color !== '-' ? i.color : ''; this.$('edit-inv-size').value = i.size !== '-' ? i.size : '';
+            this.$('edit-inv-date').value = i.date || ''; this.$('edit-inv-stock').value = i.initialStock !== undefined ? i.initialStock : i.stock;
+            this.$('edit-inv-cost-total').value = i.costTotal || '';
+            this.$('modal-edit-inv').classList.remove('hidden');
+        },
+        confirmEditInv(e) {
+            e.preventDefault();
+            const item = this.data.inventory.find(i => i.id === this.$('edit-inv-id').value); if (!item) return;
+            // 1) Validar ANTES de modificar nada
+            const nInit = parseInt(this.$('edit-inv-stock').value, 10);
+            const prevInit = item.initialStock !== undefined ? item.initialStock : item.stock;
+            const sold = prevInit - item.stock;
+            if (isNaN(nInit) || nInit < sold) return this.showToast(`Error: ya vendiste ${sold} u. de este lote. Mínimo permitido: ${sold}`, 'error');
+            // 2) Aplicar
+            const nName = this.$('edit-inv-name').value.trim().toUpperCase();
+            const nColor = this.$('edit-inv-color').value || '-', nSize = this.$('edit-inv-size').value || '-';
+            this.data.inventory.forEach(i => { if (i.code === item.code) i.name = nName; });
+            this.data.sales.forEach(s => { if (s.itemCode === item.code) s.itemName = nName; });
+            // Las ventas hechas desde este lote conservan la variante coherente
+            this.data.sales.forEach(s => { if (s.itemId === item.id) { s.color = nColor; s.size = nSize; } });
+            item.color = nColor; item.size = nSize; item.date = this.$('edit-inv-date').value;
+            item.initialStock = nInit; item.stock = nInit - sold;
+            const cTotal = parseFloat(this.$('edit-inv-cost-total').value) || 0;
+            item.costTotal = cTotal; item.costUnit = nInit > 0 ? cTotal / nInit : 0;
+            // El costo unitario también debe reflejarse en ventas ya hechas de este lote (FIFO)
+            this.data.sales.forEach(s => { if (s.itemId === item.id) s.costUnit = item.costUnit; });
+            this.saveData(); this.renderInventory(); this.renderSales(); this.renderClientes(); this.renderReportes();
+            this.closeModal('modal-edit-inv'); this.showToast('Producto actualizado.');
+        },
+
+        /* ---------- VENTAS ---------- */
+        addSaleRow() {
+            const id = ++this.rowCounter;
+            const pays = this.data.payments.map(p => `<option value="${this.esc(p.name)}">${this.esc(p.name)}</option>`).join('');
+            this.$('sale-rows-container').insertAdjacentHTML('beforeend', `<div id="row-${id}" class="sale-row relative bg-white p-4 rounded-xl border border-surface-200 shadow-sm flex flex-col md:flex-row gap-4 items-end group hover:border-brand-300 transition-colors" data-row-id="${id}"><button type="button" onclick="app.removeRow(${id})" class="absolute top-4 right-4 text-surface-300 hover:text-rose-500 font-bold"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button><div class="flex-1 relative w-full pr-8 md:pr-0"><label class="block text-[10px] font-semibold text-surface-500 uppercase tracking-wider mb-1.5">Variante Exacta *</label><input type="text" id="search-${id}" oninput="app.onRowInput(${id})" onfocus="app.handleRowSearch(${id})" placeholder="Código o Nombre..." class="w-full uppercase-input rounded-xl border border-surface-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none shadow-sm transition-all" autocomplete="off"><input type="hidden" id="product-key-${id}"><div id="dropdown-${id}" class="hidden absolute z-30 w-full mt-1 bg-white shadow-xl border border-surface-200 max-h-56 rounded-xl overflow-y-auto"></div></div><div class="w-full md:w-24 shrink-0"><label class="block text-[10px] font-semibold text-brand-600 uppercase tracking-wider mb-1.5">Cant. *</label><input type="number" id="qty-${id}" min="1" step="1" class="w-full rounded-xl border border-brand-200 bg-brand-50 px-3 py-2 text-sm font-bold focus:border-brand-500 focus:ring-1 focus:ring-brand-500 text-center outline-none shadow-sm" oninput="app.validateRowStock(${id})"><div id="stock-info-${id}" class="text-[9px] text-surface-400 mt-1 text-center font-semibold"></div></div><div class="w-full md:w-32 shrink-0"><label class="block text-[10px] font-semibold text-surface-500 uppercase tracking-wider mb-1.5">Total ($)*</label><input type="number" id="total-${id}" min="0" step="0.01" class="w-full rounded-xl border border-surface-300 px-3 py-2 text-sm font-bold text-surface-800 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 text-center outline-none shadow-sm"></div><div class="w-full md:w-36 shrink-0"><label class="block text-[10px] font-semibold text-surface-500 uppercase tracking-wider mb-1.5">Pago*</label><select id="payment-${id}" class="w-full rounded-xl border border-surface-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none shadow-sm cursor-pointer">${pays}</select></div></div>`);
+        },
+        removeRow(id) { const r = this.$(`row-${id}`); if (r) r.remove(); },
+        onRowInput(id) { this.$(`product-key-${id}`).value = ''; this.$(`stock-info-${id}`).textContent = ''; this.handleRowSearch(id); },
+        handleRowSearch(id) {
+            const term = this.$(`search-${id}`).value.toUpperCase().trim(), drop = this.$(`dropdown-${id}`), g = {};
+            this.data.inventory.forEach(i => {
+                if (i.stock > 0 && i.status !== 'CANCELLED') { const k = this.vKey(i); if (!g[k]) g[k] = { ...i, vKey: k, aggStk: 0 }; g[k].aggStk += i.stock; }
+            });
+            let avail = Object.values(g);
+            if (term) avail = avail.filter(i => `${i.name || ''} ${i.code || ''} ${i.color || ''} ${i.size || ''}`.toUpperCase().includes(term));
+            drop.innerHTML = '';
+            if (avail.length === 0) drop.innerHTML = '<div class="p-4 text-[10px] text-center text-surface-400 font-semibold uppercase tracking-wider">Sin stock físico</div>';
+            else avail.slice(0, 50).forEach(i => {
+                const d = document.createElement('div'); d.className = 'px-4 py-3 hover:bg-surface-50 cursor-pointer border-b border-surface-100 flex justify-between items-center transition-colors';
+                d.innerHTML = `<div><span class="font-bold text-surface-900 text-sm">[${this.esc(i.code)}]</span> <span class="font-medium text-surface-700 text-sm">${this.esc(i.name)}</span><br><span class="text-[10px] text-surface-500 uppercase tracking-widest mt-1 block">Col: <b class="text-brand-600">${this.esc(i.color || '-')}</b> | Tal: <b class="text-brand-600">${this.esc(i.size || '-')}</b></span></div><div class="text-[10px] font-bold text-brand-700 bg-brand-50 px-2 py-1 rounded shadow-sm border border-brand-100 text-center uppercase tracking-widest">Disp<br><span class="text-sm">${i.aggStk}</span></div>`;
+                d.onmousedown = (ev) => { ev.preventDefault(); this.selectRowProduct(id, i); };
+                drop.appendChild(d);
+            });
+            drop.classList.remove('hidden');
+        },
+        selectRowProduct(id, i) {
+            this.$(`product-key-${id}`).value = i.vKey;
+            this.$(`search-${id}`).value = `[${i.code}] ${i.name} (${i.color || '-'}-${i.size || '-'})`;
+            const qty = this.$(`qty-${id}`); qty.max = i.aggStk; qty.value = 1;
+            this.$(`stock-info-${id}`).textContent = `Max: ${i.aggStk}`;
+            this.$(`dropdown-${id}`).classList.add('hidden'); this.$(`total-${id}`).value = '';
+        },
+        validateRowStock(id) {
+            const inp = this.$(`qty-${id}`);
+            if (inp.max && parseInt(inp.value, 10) > parseInt(inp.max, 10)) { inp.value = inp.max; this.showToast('Supera el stock disponible.', 'error'); }
+        },
+        submitVenta() {
+            const cust = this.cleanPhone(this.$('global-sale-customer').value), sDate = this.$('global-sale-date').value;
+            if (cust.length < 7) return this.showToast('WhatsApp requerido (solo números, mín. 7 dígitos).', 'error');
+            if (!sDate) return this.showToast('Fecha requerida.', 'error');
+
+            const toProc = [], chk = {};
+            for (const r of document.querySelectorAll('.sale-row')) {
+                const id = r.dataset.rowId, k = this.$(`product-key-${id}`).value;
+                if (!k) continue;
+                const q = parseInt(this.$(`qty-${id}`).value, 10), total = parseFloat(this.$(`total-${id}`).value), p = this.$(`payment-${id}`).value;
+                if (isNaN(q) || q <= 0) return this.showToast('Cantidad inválida.', 'error');
+                if (isNaN(total) || total < 0) return this.showToast('Ingresa el Total cobrado de cada producto.', 'error');
+                const [c, col, s] = k.split('|');
+                chk[k] = (chk[k] || 0) + q;
+                if (chk[k] > this.variantStock(c, col, s)) return this.showToast(`Falta stock para [${c}] ${col}-${s}.`, 'error');
+                toProc.push({ c, col, s, q, p, u: total / q });
+            }
+            if (toProc.length === 0) return this.showToast('Agrega al menos un producto.', 'error');
+
+            const createdAt = new Date().toISOString();
+            toProc.forEach(req => {
+                const gId = this.generateId(); let qR = req.q;
+                for (const b of this.activeBatches(req.c, req.col, req.s)) {
+                    if (qR <= 0) break;
+                    const ded = Math.min(b.stock, qR); b.stock -= ded; qR -= ded;
+                    this.data.sales.unshift({
+                        id: this.generateId(), groupId: gId, createdAt, saleDate: sDate, customer: cust, payment: req.p,
+                        categoryId: b.categoryId, categoryName: b.categoryName, itemId: b.id, itemCode: b.code, itemName: b.name,
+                        color: b.color || '-', size: b.size || '-', salePrice: req.u, costUnit: b.costUnit || 0, quantity: ded, status: 'ACTIVE', shippingStatus: 'PENDING'
+                    });
+                }
+            });
+            this.saveData();
+            this.$('global-sale-customer').value = ''; this.$('sale-rows-container').innerHTML = ''; this.addSaleRow();
+            this.refreshAfterSaleChange(); this.showToast('Venta procesada.');
+        },
+        renderSales() {
+            const tb = this.$('sales-tbody'), term = this.$('search-sales').value.toLowerCase().trim();
+            const dType = this.$('sale-date-type').value, dStart = this.$('sale-date-start').value, dEnd = this.$('sale-date-end').value;
+            const filt = this.data.sales.filter(s => {
+                const mT = term === '' || `${s.customer || ''} ${s.itemCode || ''} ${s.itemName || ''}`.toLowerCase().includes(term);
+                let mD = true;
+                if (dStart || dEnd) { const tD = dType === 'venta' ? (s.saleDate || '') : (s.createdAt || '').split('T')[0]; if (dStart && tD < dStart) mD = false; if (dEnd && tD > dEnd) mD = false; }
+                return mT && mD;
+            });
+
+            const gMap = new Map();
+            filt.forEach(s => {
+                const code = s.itemCode || '';
+                if (!gMap.has(code)) gMap.set(code, { code, name: s.itemName, cat: s.categoryName, tQty: 0, tRev: 0, vars: new Map() });
+                const g = gMap.get(code), rev = s.salePrice * s.quantity;
+                if (s.status !== 'CANCELLED') { g.tQty += s.quantity; g.tRev += rev; }
+                const vK = `${s.color || '-'}-${s.size || '-'}`;
+                if (!g.vars.has(vK)) g.vars.set(vK, { color: s.color || '-', size: s.size || '-', tQty: 0, tRev: 0, txs: new Map() });
+                const v = g.vars.get(vK);
+                if (s.status !== 'CANCELLED') { v.tQty += s.quantity; v.tRev += rev; }
+                const k = this.txKey(s);
+                if (!v.txs.has(k)) v.txs.set(k, { ...s, dispQty: 0, dispTotal: 0 });
+                const tx = v.txs.get(k); tx.dispQty += s.quantity; tx.dispTotal += rev;
+            });
+
+            const gArr = Array.from(gMap.values()).sort((a, b) => (b.code || '').localeCompare(a.code || ''));
+            const iShow = this.paginate('sales', gArr);
+            if (iShow.length === 0) { tb.innerHTML = this.emptyRow(2); return; }
+
+            let html = '';
+            iShow.forEach(g => {
+                const sGId = this.safeId('sale-grp-', g.code);
+                let vHtml = '';
+                Array.from(g.vars.values()).sort((a, b) => (a.color || '').localeCompare(b.color || '')).forEach(v => {
+                    let tHtml = '';
+                    Array.from(v.txs.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)).forEach(tx => {
+                        const isC = tx.status === 'CANCELLED', key = this.txKey(tx);
+                        const tC = isC ? 'bg-rose-50/50 text-surface-400 opacity-70' : 'bg-white hover:bg-surface-50 transition-colors';
+                        const acts = isC
+                            ? `<button onclick="app.restoreSale(${this.jsq(key)})" class="text-[9px] bg-emerald-50 text-emerald-700 px-3 py-1 rounded border border-emerald-200 font-medium hover:bg-emerald-100 uppercase tracking-widest">Restaurar</button>`
+                            : `<button onclick="app.openEditSale(${this.jsq(key)})" class="text-[9px] bg-surface-50 text-surface-600 px-2 py-1 rounded border border-surface-200 font-medium hover:bg-surface-100 uppercase tracking-widest">Editar</button><button onclick="app.openDeleteSale(${this.jsq(key)})" class="text-[9px] bg-rose-50 text-rose-600 px-2 py-1 rounded border border-rose-200 font-medium hover:bg-rose-100 uppercase tracking-widest">Anular</button>`;
+                        tHtml += `<div class="flex justify-between items-center py-3 border-b border-surface-100 last:border-0 text-xs px-5 ${tC}"><div class="grid grid-cols-6 gap-4 flex-1"><div><span class="text-[9px] text-surface-400 uppercase tracking-widest block">F. Venta</span><span class="font-medium">${this.formatDate(tx.saleDate)}</span></div><div><span class="text-[9px] text-surface-400 uppercase tracking-widest block">F. Sistema</span><span class="font-medium">${this.formatDateTime(tx.createdAt)}</span></div><div><span class="text-[9px] text-surface-400 uppercase tracking-widest block">Cliente</span><a href="${this.esc(this.waLink(tx.customer))}" target="_blank" rel="noopener noreferrer" class="font-bold text-brand-600 hover:underline">${this.esc(tx.customer)}</a></div><div><span class="text-[9px] text-surface-400 uppercase tracking-widest block">Método</span><span class="font-medium bg-surface-100 px-2 py-0.5 rounded text-[10px]">${this.esc(tx.payment)}</span></div><div><span class="text-[9px] text-surface-400 uppercase tracking-widest block">Cant.</span><span class="font-bold text-sm ${isC ? '' : 'text-surface-800'}">x${tx.dispQty}</span></div><div><span class="text-[9px] text-surface-400 uppercase tracking-widest block">Total</span><span class="font-bold text-sm ${isC ? '' : 'text-brand-600'}">${this.money(tx.dispTotal)}</span></div></div><div class="flex gap-1.5 shrink-0 ml-4">${acts}</div></div>`;
+                    });
+                    const vId = this.safeId(sGId + '-', v.color, v.size);
+                    vHtml += `<div class="mb-3 border border-surface-200 rounded-xl overflow-hidden shadow-sm"><div class="bg-white px-4 py-3 flex justify-between items-center cursor-pointer hover:bg-surface-50 transition-colors" onclick="app.toggleRow('${vId}', event)"><div class="flex items-center gap-4"><div class="text-xs font-semibold text-surface-700 bg-surface-100 px-3 py-1 rounded-md"><span class="text-surface-400 uppercase tracking-widest text-[10px] mr-1">Color</span> ${this.esc(v.color)} <span class="text-surface-300 mx-2">|</span> <span class="text-surface-400 uppercase tracking-widest text-[10px] mr-1">Talla</span> ${this.esc(v.size)}</div></div><div class="flex gap-6 items-center"><div class="text-right"><span class="text-[9px] text-surface-400 font-semibold uppercase tracking-widest block">Vendidos</span><span class="text-sm font-bold text-surface-800">${v.tQty}</span></div><div class="text-right"><span class="text-[9px] text-surface-400 font-semibold uppercase tracking-widest block">Ingresos</span><span class="text-sm font-bold text-emerald-600">${this.money(v.tRev)}</span></div>${this.chevron(vId)}</div></div><div id="${vId}" class="hidden border-t border-surface-100 bg-surface-50">${tHtml}</div></div>`;
+                });
+
+                html += `<tr class="hover:bg-surface-50/50 border-b border-surface-200 cursor-pointer transition-colors" onclick="app.toggleRow('${sGId}', event)"><td class="px-6 py-4 bg-white border-r border-surface-100"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold shadow-sm"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg></div><div><span class="font-mono font-bold text-surface-900 block leading-tight">${this.esc(g.code)}</span><span class="font-medium text-surface-600 text-xs block">${this.esc(g.name)}</span><span class="text-[9px] font-semibold text-surface-400 bg-surface-100 px-1.5 py-0.5 rounded uppercase tracking-widest mt-1 inline-block">${this.esc(g.cat)}</span></div></div></td><td class="px-6 py-4 bg-surface-50/30"><div class="flex items-center justify-end gap-6"><div class="text-right"><span class="text-[9px] text-surface-400 font-semibold uppercase tracking-widest block">Total Prendas</span><span class="text-xl font-bold text-surface-800">${g.tQty}</span></div><div class="text-right"><span class="text-[9px] text-surface-400 font-semibold uppercase tracking-widest block">Total Ingresos</span><span class="text-xl font-bold text-emerald-600">${this.money(g.tRev)}</span></div>${this.chevron(sGId)}</div></td></tr><tr id="${sGId}" class="hidden"><td colspan="2" class="p-6 bg-surface-100/50 border-b-2 border-indigo-100 shadow-inner">${vHtml}</td></tr>`;
+            });
+            tb.innerHTML = html;
+            this.restoreOpenRows();
+        },
+        activeLines(gK) { return this.data.sales.filter(s => this.txKey(s) === gK && s.status !== 'CANCELLED'); },
+        openEditSale(gK) {
+            const p = this.activeLines(gK); if (p.length === 0) return;
+            const cQ = p.reduce((a, i) => a + i.quantity, 0), cT = p.reduce((a, i) => a + i.salePrice * i.quantity, 0);
+            this.$('edit-sale-payment').innerHTML = this.data.payments.map(x => `<option value="${this.esc(x.name)}">${this.esc(x.name)}</option>`).join('');
+            this.$('edit-sale-id').value = gK; this.$('edit-sale-date').value = p[0].saleDate || '';
+            this.$('edit-sale-qty').value = cQ; this.$('edit-sale-total').value = cT.toFixed(2); this.$('edit-sale-payment').value = p[0].payment;
+            this.$('modal-edit-sale').classList.remove('hidden');
+        },
+        confirmEditSale(e) {
+            e.preventDefault();
+            const gK = this.$('edit-sale-id').value, nQ = parseInt(this.$('edit-sale-qty').value, 10), nT = parseFloat(this.$('edit-sale-total').value);
+            const nP = this.$('edit-sale-payment').value, nD = this.$('edit-sale-date').value;
+            if (isNaN(nQ) || nQ <= 0 || isNaN(nT) || nT < 0 || !nD) return this.showToast('Valores inválidos o incompletos.', 'error');
+            const nPr = nT / nQ, p = this.activeLines(gK); if (p.length === 0) return;
+            const cQ = p.reduce((a, i) => a + i.quantity, 0);
+            const b0 = this.data.inventory.find(i => i.id === p[0].itemId);
+            if (!b0) return this.showToast('No se encontró el lote original de esta venta.', 'error');
+            const c = b0.code, col = b0.color || '-', sz = b0.size || '-';
+
+            if (nQ !== cQ) {
+                // Devolver stock, validar y volver a descontar por FIFO
+                p.forEach(x => { const b = this.data.inventory.find(i => i.id === x.itemId); if (b) b.stock += x.quantity; });
+                if (nQ > this.variantStock(c, col, sz)) {
+                    p.forEach(x => { const b = this.data.inventory.find(i => i.id === x.itemId); if (b) b.stock -= x.quantity; });
+                    return this.showToast('Stock físico insuficiente.', 'error');
+                }
+                this.data.sales = this.data.sales.filter(s => this.txKey(s) !== gK || s.status === 'CANCELLED');
+                let qR = nQ; const tmpl = p[0];
+                for (const b of this.activeBatches(c, col, sz)) {
+                    if (qR <= 0) break;
+                    const ded = Math.min(b.stock, qR); b.stock -= ded; qR -= ded;
+                    this.data.sales.unshift({ ...tmpl, id: this.generateId(), groupId: gK, itemId: b.id, itemName: b.name, saleDate: nD, salePrice: nPr, costUnit: b.costUnit || 0, quantity: ded, payment: nP });
+                }
+            } else {
+                p.forEach(x => { x.salePrice = nPr; x.payment = nP; x.saleDate = nD; });
+            }
+            this.saveData(); this.refreshAfterSaleChange(); this.closeModal('modal-edit-sale'); this.showToast('Transacción corregida.');
+        },
+        openDeleteSale(gK) { this.$('delete-sale-id').value = gK; this.$('modal-delete-sale').classList.remove('hidden'); },
+        confirmDeleteSale() {
+            const gK = this.$('delete-sale-id').value, p = this.activeLines(gK);
+            if (p.length === 0) return this.closeModal('modal-delete-sale');
+            p.forEach(x => { const b = this.data.inventory.find(i => i.id === x.itemId); if (b) b.stock += x.quantity; x.status = 'CANCELLED'; x.shippingStatus = 'CANCELLED'; });
+            this.saveData(); this.refreshAfterSaleChange(); this.closeModal('modal-delete-sale'); this.showToast('Venta anulada.');
+        },
+        restoreSale(gK) {
+            const p = this.data.sales.filter(s => this.txKey(s) === gK && s.status === 'CANCELLED'); if (p.length === 0) return;
+            const need = {}, ref = {};
+            for (const s of p) {
+                const b = this.data.inventory.find(i => i.id === s.itemId);
+                if (!b) return this.showToast('No se puede restaurar: el lote original ya no existe.', 'error');
+                const k = this.vKey(b); need[k] = (need[k] || 0) + s.quantity; if (!ref[k]) ref[k] = s;
+            }
+            for (const k in need) { const [c, col, sz] = k.split('|'); if (this.variantStock(c, col, sz) < need[k]) return this.showToast('Stock insuficiente para restaurar.', 'error'); }
+            this.data.sales = this.data.sales.filter(s => this.txKey(s) !== gK || s.status !== 'CANCELLED');
+            for (const k in need) {
+                let qR = need[k]; const [c, col, sz] = k.split('|');
+                for (const b of this.activeBatches(c, col, sz)) {
+                    if (qR <= 0) break;
+                    const ded = Math.min(b.stock, qR); b.stock -= ded; qR -= ded;
+                    this.data.sales.unshift({ ...ref[k], id: this.generateId(), groupId: gK, itemId: b.id, itemCode: b.code, itemName: b.name, costUnit: b.costUnit || 0, quantity: ded, status: 'ACTIVE', shippingStatus: 'PENDING', shippingDate: null, tracking: null });
+                }
+            }
+            this.saveData(); this.refreshAfterSaleChange(); this.showToast('Ticket restaurado.');
+        },
+
+        /* ---------- CLIENTES / ENVÍOS ---------- */
+        renderClientes() {
+            const container = this.$('clientes-tbody'), term = this.$('search-clientes').value.toLowerCase().trim();
+            const massStr = this.$('clientes-massive-list').value.trim();
+            const dType = this.$('clientes-date-type').value, dStart = this.$('clientes-date-start').value, dEnd = this.$('clientes-date-end').value;
+            const vWhats = massStr ? massStr.split(/[\s,;]+/).map(w => this.cleanPhone(w)).filter(Boolean) : [];
+
+            const filt = this.data.sales.filter(s => {
+                const mT = term === '' || (s.customer || '').includes(term);
+                let mD = true;
+                if (dStart || dEnd) { const tD = dType === 'envio' ? (s.shippingDate || '') : (s.saleDate || ''); if (dStart && tD < dStart) mD = false; if (dEnd && tD > dEnd) mD = false; }
+                return mT && mD && (vWhats.length === 0 || vWhats.includes(s.customer));
+            });
+
+            const grouped = new Map();
+            filt.forEach(s => {
+                const stK = s.status === 'CANCELLED' ? 'CANCELLED' : (s.shippingStatus === 'SHIPPED' ? 'SHIPPED' : 'PENDING');
+                const cust = s.customer || 'SIN_CLIENTE';
+                const dateK = stK === 'SHIPPED' ? (s.shippingDate || 'SIN_FECHA') : (s.saleDate || 'SIN_FECHA');
+                if (!grouped.has(stK)) grouped.set(stK, { status: stK, tItems: 0, custs: new Map() });
+                const st = grouped.get(stK); if (s.status !== 'CANCELLED') st.tItems += s.quantity;
+                if (!st.custs.has(cust)) st.custs.set(cust, { cust, tItems: 0, dates: new Map() });
+                const cg = st.custs.get(cust); if (s.status !== 'CANCELLED') cg.tItems += s.quantity;
+                if (!cg.dates.has(dateK)) cg.dates.set(dateK, { date: dateK, txs: new Map() });
+                const dg = cg.dates.get(dateK), k = this.txKey(s);
+                if (!dg.txs.has(k)) dg.txs.set(k, { ...s, dispQty: 0 });
+                dg.txs.get(k).dispQty += s.quantity;
+            });
+
+            const order = { PENDING: 1, SHIPPED: 2, CANCELLED: 3 };
+            const stArr = Array.from(grouped.values()).sort((a, b) => order[a.status] - order[b.status]);
+            const iShow = this.paginate('clientes', stArr);
+            if (iShow.length === 0) { container.innerHTML = this.emptyRow(2); return; }
+
+            let html = '';
+            iShow.forEach(st => {
+                const idSt = 'cli-st-' + st.status;
+                let cHtml = '';
+                Array.from(st.custs.values()).sort((a, b) => (a.cust || '').localeCompare(b.cust || '')).forEach(cg => {
+                    const idC = this.safeId(idSt + '-', cg.cust);
+                    let dHtml = '';
+                    Array.from(cg.dates.values()).sort((a, b) => (b.date || '').localeCompare(a.date || '')).forEach(dg => {
+                        const idD = this.safeId(idC + '-', dg.date);
+                        let txHtml = '';
+                        Array.from(dg.txs.values()).forEach(tx => {
+                            const key = this.txKey(tx); let acts = '';
+                            if (st.status === 'PENDING') acts = `<button onclick="app.openModalEnvio(${this.jsq(cg.cust)}, ${this.jsq(key)}); event.stopPropagation();" class="bg-white border border-brand-300 text-brand-600 px-3 py-1 rounded text-[10px] font-bold hover:bg-brand-50 shadow-sm transition-colors uppercase tracking-widest">Enviar</button>`;
+                            else if (st.status === 'SHIPPED') acts = `<button onclick="app.openModalConfirmRevert(${this.jsq(cg.cust)}, ${this.jsq(key)}); event.stopPropagation();" class="text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1 rounded text-[10px] font-bold hover:bg-amber-100 shadow-sm transition-colors uppercase tracking-widest">Revertir</button>`;
+                            const trk = (st.status === 'SHIPPED' && tx.tracking) ? `<span class="text-[9px] text-surface-400 uppercase tracking-widest block">Tracking: ${this.esc(tx.tracking)}</span>` : '';
+                            txHtml += `<div class="flex justify-between items-center py-3 border-b border-surface-100 last:border-0 text-xs px-5 hover:bg-surface-50 transition-colors"><div class="grid grid-cols-4 gap-4 flex-1 items-center"><div class="col-span-2"><span class="font-bold text-xs text-surface-900 block truncate"><b class="text-brand-600">[${this.esc(tx.itemCode)}]</b> ${this.esc(tx.itemName)}</span>${trk}</div><div><span class="font-semibold text-[11px] bg-surface-100 px-2 py-0.5 rounded text-surface-700">${this.esc(tx.color || '-')} - ${this.esc(tx.size || '-')}</span></div><div><span class="font-bold text-sm text-surface-800">x${tx.dispQty}</span></div></div><div class="flex gap-1.5 shrink-0 ml-4">${acts}</div></div>`;
+                        });
+                        const dateLabel = st.status === 'SHIPPED' ? 'F. Envío' : 'F. Venta';
+                        const copyData = encodeURIComponent(JSON.stringify(Array.from(dg.txs.values()).map(t => ({ dispQty: t.dispQty, itemName: t.itemName, color: t.color, size: t.size }))));
+                        const copyBtn = `<button type="button" onclick="app.copyShippingDetails(${this.jsq(dg.date)}, ${this.jsq(copyData)}); event.stopPropagation();" class="ml-3 bg-surface-200 text-surface-700 hover:bg-brand-100 hover:text-brand-700 px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1.5 transition-colors shadow-sm" title="Copiar resumen para WhatsApp">Copiar</button>`;
+                        dHtml += `<div class="border-t border-surface-100 first:border-0"><div class="bg-surface-50 px-4 py-2.5 flex items-center justify-between cursor-pointer hover:bg-surface-100 transition-colors" onclick="app.toggleRow('${idD}', event)"><div class="flex items-center"><span class="text-[10px] font-bold text-surface-600 uppercase tracking-widest">${dateLabel}: ${dg.date === 'SIN_FECHA' ? 'N/A' : this.formatDate(dg.date)}</span>${copyBtn}</div>${this.chevron(idD)}</div><div id="${idD}" class="hidden bg-white">${txHtml}</div></div>`;
+                    });
+
+                    let massive = '';
+                    if (st.status === 'PENDING') massive = `<button onclick="app.openModalEnvio(${this.jsq(cg.cust)}); event.stopPropagation();" class="bg-brand-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-brand-700 shadow-sm transition-transform active:scale-95 uppercase tracking-widest">Despachar Todo</button>`;
+                    else if (st.status === 'SHIPPED') massive = `<button onclick="app.openModalConfirmRevertTodo(${this.jsq(cg.cust)}); event.stopPropagation();" class="bg-white border border-amber-300 text-amber-700 px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-amber-50 shadow-sm transition-colors uppercase tracking-widest">Revertir Todo</button>`;
+
+                    cHtml += `<div class="mb-3 border border-surface-200 rounded-xl overflow-hidden shadow-sm"><div class="bg-white px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-surface-50 transition-colors" onclick="app.toggleRow('${idC}', event)"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-surface-100 flex items-center justify-center text-surface-500"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 21c-1.605 0-3.11-.42-4.425-1.16l-4.908 1.288 1.309-4.781A8.932 8.932 0 012.83 12.012c0-4.954 4.04-8.988 9.006-8.988 4.966 0 9.006 4.034 9.006 8.988s-4.04 8.988-9.006 8.988z"></path></svg></div><div><a href="${this.esc(this.waLink(cg.cust))}" target="_blank" rel="noopener noreferrer" class="font-bold text-sm text-surface-900 tracking-tight hover:text-brand-600 transition-colors block">${this.esc(cg.cust)}</a><span class="text-[9px] text-surface-500 font-semibold uppercase tracking-widest">${cg.tItems} Ítems</span></div></div><div class="flex items-center gap-4">${massive}${this.chevron(idC)}</div></div><div id="${idC}" class="hidden">${dHtml}</div></div>`;
+                });
+
+                let clsBg, clsTxt, title, icon;
+                if (st.status === 'PENDING') { clsBg = 'bg-amber-50'; clsTxt = 'text-amber-600'; title = '📦 PENDIENTES DE ENVÍO'; icon = 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'; }
+                else if (st.status === 'SHIPPED') { clsBg = 'bg-emerald-50'; clsTxt = 'text-emerald-600'; title = '🚚 ENVIADOS'; icon = 'M5 13l4 4L19 7'; }
+                else { clsBg = 'bg-rose-50'; clsTxt = 'text-rose-600'; title = '🚫 ANULADOS'; icon = 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636'; }
+
+                html += `<tr class="hover:bg-surface-50/50 border-b border-surface-200 cursor-pointer transition-colors" onclick="app.toggleRow('${idSt}', event)"><td class="px-6 py-4 bg-white border-r border-surface-100"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl ${clsBg} border border-surface-100 flex items-center justify-center ${clsTxt} font-bold shadow-sm"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${icon}"></path></svg></div><div><span class="font-bold text-lg text-surface-900 tracking-tight block">${title}</span><span class="text-[10px] text-surface-500 font-semibold uppercase tracking-widest">${st.custs.size} Clientes Agrupados</span></div></div></td><td class="px-6 py-4 bg-surface-50/30"><div class="flex items-center justify-end gap-6"><div class="text-right"><span class="text-[9px] text-surface-400 uppercase tracking-widest block font-semibold mb-0.5">Total Unidades</span><span class="font-bold text-surface-800 text-lg">${st.tItems}</span></div>${this.chevron(idSt)}</div></td></tr><tr id="${idSt}" class="hidden"><td colspan="2" class="p-6 bg-surface-100/50 border-b-2 border-surface-200 shadow-inner">${cHtml}</td></tr>`;
+            });
+            container.innerHTML = html;
+            this.restoreOpenRows();
+        },
+        copyShippingDetails(dateStr, txsEncoded) {
+            try {
+                const txs = JSON.parse(decodeURIComponent(txsEncoded));
+                const displayDate = dateStr === 'SIN_FECHA' ? 'Pendiente' : this.formatDate(dateStr);
+                let itemsText = '', totalQty = 0; const agg = {};
+                txs.forEach(tx => {
+                    const k = `${tx.itemName}|${tx.color || '-'}|${tx.size || '-'}`;
+                    if (!agg[k]) agg[k] = { ...tx, total: 0 };
+                    agg[k].total += tx.dispQty; totalQty += tx.dispQty;
+                });
+                Object.values(agg).forEach(it => {
+                    const d = [];
+                    if (it.color && it.color !== '-') d.push(`color: ${String(it.color).toLowerCase()}`);
+                    if (it.size && it.size !== '-') d.push(`talla: ${it.size}`);
+                    itemsText += `🌻 *${it.total} x ${it.itemName}*${d.length ? ` _(${d.join(', ')})_` : ''}\n\n`;
+                });
+                const text = `*📦 DETALLE DE ENVÍO*\n\n*📅 Fecha de envío:* ${displayDate}\n\n*🛍️ Compras incluidas:*\n\n${itemsText}✅ *Total de prendas: ${totalQty}*`;
+                const ok = () => this.showToast('Resumen copiado para WhatsApp 📋');
+                if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(ok).catch(() => this.fallbackCopy(text));
+                else this.fallbackCopy(text);
+            } catch (e) { this.showToast('Error al copiar', 'error'); }
+        },
+        fallbackCopy(text) {
+            const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+            document.body.appendChild(ta); ta.focus(); ta.select();
+            try { document.execCommand('copy'); this.showToast('Resumen copiado para WhatsApp 📋'); } catch (err) { this.showToast('Error al copiar al portapapeles', 'error'); }
+            document.body.removeChild(ta);
+        },
+        openModalEnvio(c, filterKey = null) {
+            this.$('form-envio').reset();
+            this.$('envio-customer').value = c; this.$('envio-date').value = this.todayISO();
+            const pend = this.data.sales.filter(s => s.customer === c && s.status === 'ACTIVE' && s.shippingStatus !== 'SHIPPED');
+            const txs = new Map();
+            pend.forEach(i => { const k = this.txKey(i); if (!txs.has(k)) txs.set(k, { ...i, dispQty: 0, ids: [] }); const t = txs.get(k); t.dispQty += i.quantity; t.ids.push(i.id); });
+            const lst = this.$('envio-products-list'); lst.innerHTML = '';
+            txs.forEach((i, k) => {
+                if (filterKey && filterKey !== k) return;
+                lst.insertAdjacentHTML('beforeend', `<label class="flex items-center gap-3 p-3 border border-surface-200 rounded-xl cursor-pointer hover:bg-brand-50 hover:border-brand-200 transition-colors bg-white"><input type="checkbox" name="envio-item-checkbox" value="${this.esc(JSON.stringify(i.ids))}" class="w-5 h-5 text-brand-600 rounded border-surface-300 focus:ring-brand-500 cursor-pointer" checked><span class="text-sm font-medium text-surface-800 flex-1 truncate"><b class="text-brand-700">[${this.esc(i.itemCode)}]</b> ${this.esc(i.itemName)} (${this.esc(i.color || '-')}-${this.esc(i.size || '-')})</span><span class="text-xs font-bold bg-surface-100 px-2 py-1 rounded text-surface-700">x${i.dispQty}</span></label>`);
+            });
+            this.$('modal-envio').classList.remove('hidden');
+        },
+        confirmEnvio(e) {
+            e.preventDefault();
+            const c = this.$('envio-customer').value, sD = this.$('envio-date').value, tr = this.$('envio-tracking').value.trim().toUpperCase();
+            if (!sD) return this.showToast('Seleccione una fecha válida', 'error');
+            let ids = [];
+            document.querySelectorAll('input[name="envio-item-checkbox"]:checked').forEach(cb => { ids = ids.concat(JSON.parse(cb.value)); });
+            if (ids.length === 0) return this.showToast('Selecciona al menos una transacción.', 'error');
+            const idSet = new Set(ids);
+            this.data.sales = this.data.sales.map(s => (s.customer === c && s.status === 'ACTIVE' && s.shippingStatus !== 'SHIPPED' && idSet.has(s.id)) ? { ...s, shippingStatus: 'SHIPPED', shippingDate: sD, tracking: tr } : s);
+            this.saveData(); this.renderClientes(); this.renderReportes(); this.closeModal('modal-envio'); this.showToast('Lote despachado exitosamente.');
+        },
+        openModalConfirmRevert(c, key) {
+            this.$('revert-customer').value = c; this.$('revert-tx-key').value = key;
+            this.$('revert-msg').textContent = '¿Devolver este ítem a cola pendiente?'; this.$('modal-confirm-revert').classList.remove('hidden');
+        },
+        openModalConfirmRevertTodo(c) {
+            this.$('revert-customer').value = c; this.$('revert-tx-key').value = 'ALL';
+            this.$('revert-msg').textContent = '¿Revertir TODOS los envíos de este cliente?'; this.$('modal-confirm-revert').classList.remove('hidden');
+        },
+        confirmReversion() {
+            const c = this.$('revert-customer').value, tId = this.$('revert-tx-key').value; let n = 0;
+            this.data.sales = this.data.sales.map(s => {
+                if (s.customer === c && s.status === 'ACTIVE' && s.shippingStatus === 'SHIPPED' && (tId === 'ALL' || this.txKey(s) === tId)) { n++; return { ...s, shippingStatus: 'PENDING', shippingDate: null, tracking: null }; }
+                return s;
+            });
+            if (n > 0) { this.saveData(); this.renderClientes(); this.renderReportes(); this.showToast(`Logística invertida (${n} registros).`); }
+            this.closeModal('modal-confirm-revert');
+        },
+
+        /* ---------- GASTOS ---------- */
+        saveGasto(e) {
+            e.preventDefault();
+            const monto = parseFloat(this.$('gasto-monto').value); if (!(monto > 0)) return this.showToast('Monto inválido.', 'error');
+            this.data.gastos.unshift({ id: this.generateId(), date: this.$('gasto-date').value, desc: this.$('gasto-desc').value.trim().toUpperCase(), monto });
+            this.saveData(); this.renderGastos(); this.renderReportes();
+            this.$('form-gastos').reset(); this.$('gasto-date').value = this.todayISO(); this.showToast('Egreso registrado.');
+        },
+        renderGastos() {
+            const tb = this.$('gastos-tbody');
+            const list = this.data.gastos.slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+            const iShow = this.paginate('gastos', list);
+            if (iShow.length === 0) { tb.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-surface-400 font-semibold uppercase tracking-widest text-[10px]">Libro vacío</td></tr>`; return; }
+            tb.innerHTML = iShow.map(g => `<tr class="border-b border-surface-100 text-sm hover:bg-surface-50/50 transition-colors"><td class="px-6 py-4 font-medium text-surface-600">${this.formatDate(g.date)}</td><td class="px-6 py-4 font-semibold text-surface-800">${this.esc(g.desc)}</td><td class="px-6 py-4 font-bold text-rose-600 text-right bg-rose-50/30">${this.money(g.monto)}</td><td class="px-6 py-4 text-right"><button onclick="app.deleteGasto(${this.jsq(g.id)})" class="bg-white border border-rose-200 text-rose-600 px-3 py-1.5 rounded-lg text-[10px] font-semibold hover:bg-rose-50 shadow-sm transition-transform active:scale-95 uppercase tracking-widest">Eliminar</button></td></tr>`).join('');
+        },
+        deleteGasto(id) {
+            if (!confirm('¿Eliminar este egreso? Esta acción no se puede deshacer.')) return;
+            this.data.gastos = this.data.gastos.filter(g => g.id !== id); this.saveData(); this.renderGastos(); this.renderReportes();
+        },
+
+        /* ---------- REPORTES ---------- */
+        renderReportes() {
+            if (this.$('view-reportes').classList.contains('hidden')) return;
+            const td = this.dayStart(new Date());
+            const aS = this.data.sales.filter(s => s.status === 'ACTIVE');
+            const gTot = this.data.gastos.reduce((a, b) => a + (b.monto || 0), 0);
+            let ing = 0, cst = 0, env = 0; const cSales = {}, r7 = Array(7).fill(0);
+
+            aS.forEach(s => {
+                const rI = (s.salePrice * s.quantity) || 0, rC = ((s.costUnit || 0) * s.quantity) || 0;
+                ing += rI; cst += rC; if (s.shippingStatus === 'SHIPPED') env += s.quantity;
+                const sD = this.parseDate(s.saleDate); if (!sD) return;
+                if (sD.getMonth() === td.getMonth() && sD.getFullYear() === td.getFullYear()) { const c = s.categoryName || 'OTRO'; cSales[c] = (cSales[c] || 0) + rI; }
+                const dD = this.daysBetween(td, sD); if (dD >= 0 && dD < 7) r7[6 - dD] += rI;
+            });
+            const anuTickets = new Set(this.data.sales.filter(s => s.status === 'CANCELLED').map(s => this.txKey(s))).size;
+            let iV = 0, iU = 0; const iT = new Set();
+            this.data.inventory.forEach(i => { if (i.stock > 0 && i.status !== 'CANCELLED') { iV += ((i.costUnit || 0) * i.stock) || 0; iU += i.stock; iT.add(i.code); } });
+
+            this.$('rep-ingresos').textContent = this.money(ing); this.$('rep-costos').textContent = this.money(cst);
+            this.$('rep-gastos').textContent = this.money(gTot); this.$('rep-ganancia').textContent = this.money(ing - cst - gTot);
+            this.$('rep-inv-valor').textContent = this.money(iV); this.$('rep-inv-unidades').textContent = iU; this.$('rep-inv-tipos').textContent = iT.size;
+            this.$('rep-pedidos-ok').textContent = new Set(aS.map(s => this.txKey(s))).size;
+            this.$('rep-pedidos-enviados').textContent = env; this.$('rep-pedidos-anulados').textContent = anuTickets;
+
+            if (typeof Chart === 'undefined') return; // sin conexión al CDN: se muestran solo los números
+
+            const l7 = []; for (let i = 6; i >= 0; i--) { const d = new Date(td); d.setDate(d.getDate() - i); l7.push(`${d.getDate()}/${d.getMonth() + 1}`); }
+            const mk = (key, canvasId, cfg) => { if (this.charts[key]) this.charts[key].destroy(); this.charts[key] = new Chart(this.$(canvasId), cfg); };
+            const grid = { borderDash: [4, 4], color: '#e2e8f0' };
+
+            mk('rev', 'chart-revenue', { type: 'bar', data: { labels: l7, datasets: [{ label: 'Ingresos ($)', data: r7, backgroundColor: '#6366f1', borderRadius: 6, hoverBackgroundColor: '#4f46e5' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid }, x: { grid: { display: false } } } } });
+            mk('cat', 'chart-categories', { type: 'doughnut', data: { labels: Object.keys(cSales), datasets: [{ data: Object.values(cSales), backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6', '#0ea5e9', '#84cc16', '#ec4899'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'right', labels: { usePointStyle: true, padding: 20, font: { family: 'Inter', size: 11 } } } } } });
+
+            const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            const last6 = [];
+            for (let i = 5; i >= 0; i--) { const d = new Date(td.getFullYear(), td.getMonth() - i, 1); last6.push({ m: d.getMonth(), y: d.getFullYear(), lbl: monthNames[d.getMonth()] + ' ' + String(d.getFullYear()).slice(2) }); }
+            const idxOf = (d) => d ? last6.findIndex(x => x.m === d.getMonth() && x.y === d.getFullYear()) : -1;
+            const mIng = Array(6).fill(0), mEgr = Array(6).fill(0), mActC = last6.map(() => new Set()), first = {};
+            aS.forEach(s => { const sd = this.parseDate(s.saleDate); if (sd && (!first[s.customer] || sd < first[s.customer])) first[s.customer] = sd; });
+            aS.forEach(s => { const i = idxOf(this.parseDate(s.saleDate)); if (i !== -1) { mIng[i] += (s.salePrice * s.quantity) || 0; mEgr[i] += ((s.costUnit || 0) * s.quantity) || 0; mActC[i].add(s.customer); } });
+            this.data.gastos.forEach(g => { const i = idxOf(this.parseDate(g.date)); if (i !== -1) mEgr[i] += g.monto || 0; });
+            const mNew = Array(6).fill(0), mRec = Array(6).fill(0);
+            mActC.forEach((set, i) => set.forEach(c => { const fp = first[c]; if (fp && fp.getMonth() === last6[i].m && fp.getFullYear() === last6[i].y) mNew[i]++; else mRec[i]++; }));
+
+            mk('fin', 'chart-finances', { type: 'bar', data: { labels: last6.map(x => x.lbl), datasets: [{ label: 'Ingresos', data: mIng, backgroundColor: '#10b981', borderRadius: 4 }, { label: 'Egresos (Costos + Gastos)', data: mEgr, backgroundColor: '#f43f5e', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid }, x: { grid: { display: false } } } } });
+            mk('ret', 'chart-retention', { type: 'bar', data: { labels: last6.map(x => x.lbl), datasets: [{ label: 'Clientes Nuevos', data: mNew, backgroundColor: '#3b82f6', borderRadius: 4 }, { label: 'Clientes Recurrentes', data: mRec, backgroundColor: '#8b5cf6', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, grid } } } });
+        },
+
+        /* ---------- CRM ---------- */
+        renderSeguimiento() {
+            const td = this.dayStart(new Date()), aS = this.data.sales.filter(s => s.status === 'ACTIVE'), pend = {};
+            aS.forEach(s => {
+                if (s.shippingStatus === 'SHIPPED') return;
+                const d = this.parseDate(s.saleDate); if (!d) return;
+                if (!pend[s.customer] || d < pend[s.customer]) pend[s.customer] = d;
+            });
+            const tbR = this.$('seg-retrasos-tbody'); let rows = '';
+            Object.keys(pend).forEach(c => {
+                const dd = this.daysBetween(td, pend[c]);
+                if (dd > 7) rows += `<tr class="hover:bg-rose-50/50 border-b border-rose-100/50 transition-colors"><td class="px-6 py-4 font-bold text-rose-900 text-sm">${this.esc(c)}</td><td class="px-6 py-4 text-surface-700 font-medium">${this.formatDate(pend[c])}</td><td class="px-6 py-4 font-bold text-rose-600 text-center"><span class="bg-rose-100 px-2 py-1 rounded text-xs">${dd} días</span></td><td class="px-6 py-4 text-right"><button onclick="app.switchTab('clientes')" class="text-[10px] bg-rose-600 text-white px-3 py-1.5 rounded-lg shadow-sm hover:bg-rose-700 font-bold uppercase tracking-widest transition-transform active:scale-95">Ir a Despachar</button></td></tr>`;
+            });
+            tbR.innerHTML = rows || `<tr><td colspan="4" class="px-6 py-8 text-center text-xs text-emerald-600 font-bold uppercase tracking-widest bg-emerald-50/30">Cero retrasos críticos detectados.</td></tr>`;
+
+            const sT = {}, sM = {}, tP = {};
+            aS.forEach(s => {
+                const r = (s.salePrice * s.quantity) || 0; sT[s.customer] = (sT[s.customer] || 0) + r;
+                const sd = this.parseDate(s.saleDate);
+                if (sd && sd.getMonth() === td.getMonth() && sd.getFullYear() === td.getFullYear()) sM[s.customer] = (sM[s.customer] || 0) + r;
+                const pK = `[${s.itemCode}] ${s.itemName} (${s.color || '-'}-${s.size || '-'})`; tP[pK] = (tP[pK] || 0) + s.quantity;
+            });
+            const rank = (obj, id, isMoney) => {
+                const ul = this.$(id), e = Object.entries(obj).sort((a, b) => b[1] - a[1]).slice(0, 10);
+                if (e.length === 0) { ul.innerHTML = '<li class="px-5 py-8 text-center text-surface-400 text-[10px] font-semibold uppercase tracking-widest">Sin datos suficientes</li>'; return; }
+                ul.innerHTML = e.map(([k, v], i) => {
+                    const pc = i === 0 ? 'bg-brand-100 text-brand-700' : (i === 1 ? 'bg-surface-200 text-surface-600' : (i === 2 ? 'bg-amber-100 text-amber-700' : 'bg-surface-50 text-surface-500 border border-surface-200'));
+                    return `<li class="flex justify-between items-center px-5 py-4 hover:bg-surface-50 border-b border-surface-100 last:border-0"><div class="flex items-center gap-3"><span class="w-6 h-6 rounded flex items-center justify-center font-bold text-[10px] ${pc}">${i + 1}</span><span class="font-semibold text-surface-800 text-xs truncate max-w-[140px] md:max-w-[180px]">${this.esc(k)}</span></div><span class="font-bold text-xs ${isMoney ? 'text-emerald-600' : 'text-brand-600'}">${isMoney ? this.money(v) : v}</span></li>`;
+                }).join('');
+            };
+            rank(sM, 'seg-top-mes', true); rank(sT, 'seg-top-hist', true); rank(tP, 'seg-top-prod', false);
+
+            const slow = this.data.inventory.filter(i => i.stock > 0 && i.status !== 'CANCELLED').map(i => {
+                const d = this.parseDate(i.date) || this.parseDate(i.createdAt) || td;
+                return { ...i, days: Math.max(0, this.daysBetween(td, d)) };
+            }).sort((a, b) => b.days - a.days).slice(0, 20);
+            const tbI = this.$('seg-inmovilizado-tbody');
+            tbI.innerHTML = slow.length === 0
+                ? `<tr><td colspan="4" class="px-6 py-8 text-center text-xs text-surface-500 font-bold uppercase tracking-widest bg-surface-50/30">Todo el stock está rotando saludablemente.</td></tr>`
+                : slow.map(i => {
+                    let cD = 'text-surface-600 bg-surface-100 border border-surface-200';
+                    if (i.days > 90) cD = 'text-rose-700 bg-rose-50 border border-rose-200 font-bold'; else if (i.days > 60) cD = 'text-amber-700 bg-amber-50 border border-amber-200 font-bold';
+                    return `<tr class="hover:bg-amber-50/30 border-b border-surface-100 transition-colors"><td class="px-6 py-3"><span class="font-bold text-surface-900 block text-sm"><b class="text-brand-600">[${this.esc(i.code)}]</b> ${this.esc(i.name)}</span><span class="text-[10px] text-surface-500 font-semibold uppercase tracking-widest">Col: ${this.esc(i.color || '-')} | Tal: ${this.esc(i.size || '-')}</span></td><td class="px-6 py-3 text-surface-600 font-medium text-xs">${this.formatDate(i.date || i.createdAt)}</td><td class="px-6 py-3 text-center"><span class="px-2.5 py-1 rounded-lg text-xs ${cD}">${i.days} días</span></td><td class="px-6 py-3 text-center"><span class="font-bold text-surface-800 text-sm bg-white border border-surface-200 shadow-sm px-3 py-1 rounded-lg">${i.stock}</span></td></tr>`;
+                }).join('');
+        },
+
+        /* ---------- AJUSTES ---------- */
+        saveCategory(e) {
+            e.preventDefault();
+            const n = this.$('cat-name').value.trim().toUpperCase(), p = this.$('cat-prefix').value.trim().toUpperCase();
+            if (!/^[A-Z0-9]{1,4}$/.test(p)) return this.showToast('Prefijo: 1 a 4 letras o números.', 'error');
+            if (this.data.categories.some(c => c.prefix === p)) return this.showToast('Prefijo duplicado.', 'error');
+            this.data.categories.push({ id: this.generateId(), name: n, prefix: p, counter: 0 });
+            this.saveData(); this.renderCategories(); this.updateDropdowns(); e.target.reset();
+        },
+        renderCategories() {
+            this.$('categories-tbody').innerHTML = this.data.categories.map(c => `<tr class="hover:bg-surface-50"><td class="px-4 py-3 font-medium text-surface-800 border-r border-surface-100">${this.esc(c.name)}</td><td class="px-4 py-3 font-mono text-brand-600 font-bold text-center text-xs tracking-widest">${this.esc(c.prefix)}</td></tr>`).join('');
+        },
+        saveConfigItem(list, id, e) {
+            e.preventDefault();
+            const v = this.$(`config-${id}`).value.trim().toUpperCase().replace(/\|/g, '-');
+            if (!v) return;
+            if (this.data[list].some(i => i.name === v)) return this.showToast('Valor duplicado.', 'error');
+            this.data[list].push({ id: this.generateId(), name: v });
+            this.saveData(); this.renderConfigLists(); this.updateDropdowns(); e.target.reset();
+        },
+        deleteConfigItem(list, id) { this.data[list] = this.data[list].filter(i => i.id !== id); this.saveData(); this.renderConfigLists(); this.updateDropdowns(); },
+        renderConfigLists() {
+            const r = (list, id) => { this.$(id).innerHTML = this.data[list].map(i => `<li class="flex justify-between items-center bg-white border border-surface-200 px-3 py-2 rounded-lg shadow-sm group hover:border-rose-200 transition-colors"><span class="font-semibold text-surface-700 text-[10px] uppercase tracking-wider">${this.esc(i.name)}</span><button type="button" onclick="app.deleteConfigItem('${list}', ${this.jsq(i.id)})" class="text-surface-300 hover:text-rose-500 font-bold transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></li>`).join(''); };
+            r('colors', 'list-colors'); r('sizes', 'list-sizes'); r('payments', 'list-payments');
+        },
+        updateDropdowns() {
+            const pop = (id, arr, placeholder, useId) => {
+                const s = this.$(id); if (!s) return; const prev = s.value;
+                s.innerHTML = `<option value="">${this.esc(placeholder)}</option>` + arr.map(i => `<option value="${this.esc(useId ? i.id : i.name)}">${this.esc(i.name)}</option>`).join('');
+                if (prev) s.value = prev;
+            };
+            const D = this.data;
+            pop('inv-category', D.categories, 'Selec. Categoría', true); pop('inv-color', D.colors, 'Sin Variante'); pop('inv-size', D.sizes, 'Sin Variante');
+            pop('restock-var-color', D.colors, 'Color'); pop('restock-var-size', D.sizes, 'Talla');
+            pop('edit-inv-category', D.categories, 'Selec. Categoría', true); pop('edit-inv-color', D.colors, 'Sin Variante'); pop('edit-inv-size', D.sizes, 'Sin Variante');
+        }
+    };
+    window.addEventListener('DOMContentLoaded', () => app.init());
+    </script>
+</body>
+</html>
