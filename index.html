@@ -117,10 +117,11 @@
                 </nav>
 
                 <div class="flex items-center gap-3">
-                    <span id="sync-status" class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-surface-600 bg-surface-100 px-3 py-1.5 rounded-full border border-surface-200" title="Estado de sincronización">
+                    <button onclick="app.forceSync()" id="sync-status" class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-surface-600 bg-surface-100 px-3 py-1.5 rounded-full border border-surface-200 shadow-sm hover:bg-surface-200 transition-colors active:scale-95 cursor-pointer" title="Clic para descargar últimos cambios de la nube">
                         <span id="sync-dot" class="w-2 h-2 rounded-full bg-surface-400"></span>
                         <span id="sync-text" class="hidden sm:inline">Sin conexión</span>
-                    </span>
+                        <svg class="w-3 h-3 ml-0.5 text-surface-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    </button>
                     <div class="lg:hidden flex items-center">
                         <select onchange="app.switchTab(this.value)" id="mobile-nav" class="bg-surface-100 text-surface-900 border border-surface-300 rounded-xl py-1.5 pl-3 pr-8 text-xs font-bold outline-none">
                             <option value="inventory">Catálogo &amp; Stock</option>
@@ -558,7 +559,7 @@
                             <svg class="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                             Sincronización con la Nube (Google Sheets)
                         </h2>
-                        <p class="text-sm text-surface-600 mb-5 max-w-3xl">Conecta tu sistema con Google Sheets para respaldar tus datos en tiempo real. Si dejas la URL en blanco, trabajará en modo local en este dispositivo.</p>
+                        <p class="text-sm text-surface-600 mb-5 max-w-3xl">Conecta tu sistema con Google Sheets para respaldar tus datos en tiempo real. La aplicación buscará y guardará cambios automáticamente de fondo. <strong class="text-rose-600">Es obligatorio configurar esta URL para poder utilizar el sistema.</strong></p>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end max-w-5xl">
                             <div class="md:col-span-2">
@@ -572,7 +573,6 @@
                         </div>
                         <div class="flex flex-wrap gap-3 mt-4">
                             <button type="button" onclick="app.saveDbUrl()" class="bg-gradient-to-r from-brand-600 to-brand-700 text-white px-6 py-2.5 rounded-2xl font-semibold hover:from-brand-700 hover:to-brand-800 text-sm shadow-md shadow-brand-600/20 transition-all active:scale-95 flex items-center justify-center gap-2">Conectar y Sincronizar</button>
-                            <button type="button" onclick="app.exportBackup()" class="bg-white border border-brand-200 text-brand-700 px-6 py-2.5 rounded-2xl font-semibold hover:bg-brand-50 text-sm shadow-sm transition-transform active:scale-95">Descargar copia de seguridad (.json)</button>
                         </div>
                     </div>
                 </div>
@@ -859,6 +859,32 @@
         </div>
     </div>
 
+    <!-- BLOQUEADOR ESTRICTO DE SINCRONIZACIÓN -->
+    <div id="sync-blocker" class="hidden fixed inset-0 bg-surface-900/90 z-[9999] flex flex-col items-center justify-center text-white backdrop-blur-md transition-opacity">
+        <!-- Estado Cargando -->
+        <div id="sync-blocker-loading" class="flex flex-col items-center">
+            <div class="relative w-16 h-16 mb-6">
+                <svg class="animate-spin absolute inset-0 w-full h-full text-brand-300/30" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle></svg>
+                <svg class="animate-spin absolute inset-0 w-full h-full text-brand-400" viewBox="0 0 24 24"><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            </div>
+            <h2 class="font-serif text-xl font-bold tracking-wide mb-2">Guardando en la nube...</h2>
+            <p class="text-xs font-semibold text-brand-200 uppercase tracking-widest">Por favor espera, asegurando datos.</p>
+        </div>
+        
+        <!-- Estado Error -->
+        <div id="sync-blocker-error" class="hidden flex flex-col items-center text-center max-w-sm px-6">
+            <div class="w-20 h-20 bg-rose-500/20 text-rose-400 rounded-full flex items-center justify-center mb-6 border border-rose-500/30">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h2 class="font-serif text-2xl font-bold tracking-wide mb-3 text-rose-400">Error de Conexión</h2>
+            <p id="sync-blocker-error-msg" class="text-sm text-surface-200 mb-8 leading-relaxed">No pudimos confirmar el guardado. Verifica tu internet y vuelve a intentarlo para no perder tus datos.</p>
+            <button onclick="app.flushSave()" class="bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-bold py-3 px-8 rounded-2xl shadow-lg shadow-rose-500/30 transition-transform active:scale-95 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                Reintentar Guardado
+            </button>
+        </div>
+    </div>
+
     <div id="global-loader" class="hidden fixed inset-0 bg-surface-900/80 z-[100] flex flex-col items-center justify-center text-white backdrop-blur-md transition-opacity">
         <div class="relative w-16 h-16 mb-6">
             <svg class="animate-spin absolute inset-0 w-full h-full text-brand-300/30" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle></svg>
@@ -884,7 +910,7 @@
         charts: {},
         KEY_URL: 'inventoSysConfigUrl',
         KEY_TOKEN: 'inventoSysToken',
-        KEY_BACKUP: 'inventoSysBackup',
+        KEY_BACKUP: 'inventoSysBackup', // Se mantiene el KEY para guardar como respaldo offline de seguridad
 
         /* ---------- Utilidades ---------- */
         generateId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 10); },
@@ -964,6 +990,15 @@
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') document.querySelectorAll('[id^="modal-"]:not(.hidden)').forEach(m => this.closeModal(m.id));
             });
+            
+            // Sync on returning to the tab
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    const url = localStorage.getItem(this.KEY_URL);
+                    if (url && this.cloudReady && !this.saving) this.loadFromCloud(url, true);
+                }
+            });
+            
             window.addEventListener('beforeunload', (e) => { if (this.saving || this.pending) { e.preventDefault(); e.returnValue = ''; } });
 
             const url = localStorage.getItem(this.KEY_URL);
@@ -972,23 +1007,19 @@
                 this.$('config-db-url').value = url;
                 this.loadFromCloud(url);
             } else {
-                try {
-                    const bk = localStorage.getItem(this.KEY_BACKUP);
-                    if (bk) this.data = this.normalize(JSON.parse(bk));
-                } catch (e) {}
-                this.setSync('local');
+                this.setSync('offline');
                 this.renderAll();
                 this.switchTab('config');
-                this.showToast('Modo local activo. Conecta tu Google Sheets en Ajustes cuando desees.', 'info');
+                this.showToast('⚠️ Configuración obligatoria: Conecta tu base de datos (URL) para usar el sistema.', 'error');
             }
         },
 
         /* ---------- Sincronización ---------- */
         setSync(state) {
             const map = {
-                local: ['bg-amber-400', 'Modo local'],
                 ok: ['bg-emerald-500', 'Sincronizado'],
                 saving: ['bg-brand-500 animate-pulse', 'Guardando...'],
+                syncing: ['bg-brand-400 animate-pulse', 'Actualizando...'],
                 error: ['bg-rose-500', 'Error de sync'],
                 offline: ['bg-surface-400', 'Sin conexión']
             };
@@ -1003,17 +1034,25 @@
         saveData() {
             const url = localStorage.getItem(this.KEY_URL);
             if (!url) {
-                try { localStorage.setItem(this.KEY_BACKUP, JSON.stringify(this.data)); } catch (e) { this.showToast('Almacenamiento del navegador lleno.', 'error'); }
-                this.setSync('local'); return;
+                this.showToast('Error: No has configurado la URL de la nube. Cambios rechazados.', 'error');
+                return;
             }
             if (!this.cloudReady) { this.showToast('Sin conexión con la nube: el cambio NO se guardó. Revisa Ajustes.', 'error'); this.setSync('error'); return; }
-            try { localStorage.setItem(this.KEY_BACKUP, JSON.stringify(this.data)); } catch (e) {}
             this.flushSave();
         },
         flushSave() {
             if (this.saving) { this.pending = true; return; }
             const url = localStorage.getItem(this.KEY_URL); if (!url) return;
             this.saving = true; this.pending = false; this.setSync('saving');
+
+            // MOSTRAR EL BLOQUEO ESTRICTO
+            const blocker = this.$('sync-blocker');
+            if (blocker) {
+                blocker.classList.remove('hidden');
+                this.$('sync-blocker-loading').classList.remove('hidden');
+                this.$('sync-blocker-error').classList.add('hidden');
+            }
+
             fetch(this.syncUrl(url), {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1023,23 +1062,56 @@
             .then(text => {
                 let resp = null;
                 try { resp = JSON.parse(text); } catch (e) {}
-                if (resp && resp.status === 'error') {
-                    throw new Error(resp.message || 'Error en servidor');
-                }
+                if (resp && resp.status === 'error') throw new Error(resp.message || 'Error en servidor');
+                // IMPORTANTE: Solo marca "OK" tras confirmación real del Backend.
                 if (!this.pending) this.setSync('ok');
+
+                // ÉXITO: QUITAR EL BLOQUEO Y AVISAR
+                if (blocker) blocker.classList.add('hidden');
+                this.showToast('Cambios registrados correctamente ✨');
             })
             .catch((err) => {
                 this.setSync('error');
-                this.showToast('No se pudo sincronizar en la nube (' + (err.message || 'red inestable') + '). Respaldo local guardado.', 'error');
+                // ERROR: MOSTRAR MENSAJE ROJO EN LA PANTALLA BLOQUEADA
+                if (blocker) {
+                    this.$('sync-blocker-loading').classList.add('hidden');
+                    this.$('sync-blocker-error').classList.remove('hidden');
+                    this.$('sync-blocker-error-msg').textContent = 'Fallo de red: ' + (err.message || 'Sin conexión') + '. Tu información está en pausa. Recupera la conexión y reintenta.';
+                }
             })
-            .finally(() => { this.saving = false; if (this.pending) this.flushSave(); });
+            .finally(() => { 
+                this.saving = false; 
+                if (this.pending) {
+                    this.pending = false; 
+                    this.flushSave(); 
+                }
+            });
         },
-        loadFromCloud(url) {
-            if (!url.endsWith('/exec')) { this.showToast('La URL del script debe terminar en /exec', 'error'); this.switchTab('config'); return; }
-            const loader = this.$('global-loader');
-            this.$('loader-msg').textContent = 'Cargando catálogo y ventas...';
-            loader.classList.remove('hidden');
-            this.cloudReady = false;
+        forceSync() {
+            const url = localStorage.getItem(this.KEY_URL);
+            if (url && this.cloudReady && !this.saving && !this.pending) {
+                this.loadFromCloud(url, true);
+            } else if (!url) {
+                this.switchTab('config');
+            }
+        },
+        loadFromCloud(url, background = false) {
+            if (!url.endsWith('/exec')) { 
+                if (!background) {
+                    this.showToast('La URL del script debe terminar en /exec', 'error'); 
+                    this.switchTab('config'); 
+                }
+                return; 
+            }
+            
+            if (!background) {
+                const loader = this.$('global-loader');
+                this.$('loader-msg').textContent = 'Cargando catálogo y ventas...';
+                loader.classList.remove('hidden');
+                this.cloudReady = false;
+            } else {
+                this.setSync('syncing');
+            }
 
             fetch(this.syncUrl(url))
                 .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.text(); })
@@ -1047,41 +1119,57 @@
                     let cloud;
                     try { cloud = JSON.parse(text); } catch (e) { throw new Error('html'); }
                     if (cloud && cloud.status === 'error') {
-                        this.setSync('error');
-                        this.showToast(cloud.message === 'unauthorized' ? 'Clave de acceso incorrecta.' : 'Error del servidor: ' + (cloud.message || ''), 'error');
-                        this.switchTab('config'); return;
+                        if (!background) {
+                            this.setSync('error');
+                            this.showToast(cloud.message === 'unauthorized' ? 'Clave de acceso incorrecta.' : 'Error del servidor: ' + (cloud.message || ''), 'error');
+                            this.switchTab('config'); 
+                        }
+                        return;
                     }
+                    
                     const fresh = !cloud || (!(cloud.categories || []).length && !(cloud.payments || []).length && !(cloud.inventory || []).length && !(cloud.sales || []).length);
-                    this.data = this.normalize(cloud);
+                    
+                    // Solo refrescar la UI si realmente hay datos nuevos para evitar interrupciones molestas
+                    const normalizedCloud = this.normalize(cloud);
+                    const newDataStr = JSON.stringify(normalizedCloud);
+                    const oldDataStr = JSON.stringify(this.data);
+                    
+                    if (newDataStr !== oldDataStr) {
+                        this.data = normalizedCloud;
+                        if (!background && fresh) { 
+                            this.data = this.emptyData(); 
+                            this.saveData(); 
+                            this.showToast('¡Bienvenida! Se creó la base inicial de tu boutique.', 'info'); 
+                        } else if (!background) {
+                            this.showToast('Boutique sincronizada en línea ✨');
+                        }
+                        
+                        this.renderAll(); 
+                        if (!background) this.switchTab('inventory');
+                    }
+                    
                     this.cloudReady = true;
-                    if (fresh) { this.data = this.emptyData(); this.saveData(); this.showToast('¡Bienvenida! Se creó la base inicial de tu boutique.', 'info'); }
-                    else this.showToast('Boutique sincronizada en línea ✨');
                     this.setSync('ok');
-                    this.renderAll(); this.switchTab('inventory');
                 })
                 .catch(err => {
-                    this.setSync('error');
-                    this.showToast(err.message === 'html' ? 'Verifica que el permiso del script sea "Cualquier usuario" y termine en /exec.' : 'Error de conexión con la nube.', 'error');
-                    this.switchTab('config');
+                    if (!background) {
+                        // En background, si el internet parpadea, lo silenciamos para no asustar, marcando como OK (estado previo)
+                        this.setSync('ok');
+                    }
                 })
-                .finally(() => loader.classList.add('hidden'));
+                .finally(() => { 
+                    if (!background) this.$('global-loader').classList.add('hidden'); 
+                });
         },
         saveDbUrl() {
             const url = this.$('config-db-url').value.trim();
             if (!url) {
-                if (confirm('¿Desconectar la nube y trabajar únicamente en este navegador?')) { localStorage.removeItem(this.KEY_URL); this.cloudReady = false; this.setSync('local'); this.showToast('Modo local activado.', 'info'); }
-                return;
+                return this.showToast('La URL de Google Sheets es obligatoria.', 'error');
             }
             if (!url.endsWith('/exec')) return this.showToast('La URL debe finalizar en /exec', 'error');
             localStorage.setItem(this.KEY_URL, url);
             localStorage.setItem(this.KEY_TOKEN, this.$('config-db-token').value.trim());
             this.loadFromCloud(url);
-        },
-        exportBackup() {
-            const blob = new Blob([JSON.stringify(this.data, null, 2)], { type: 'application/json' });
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-            a.download = `inventosys-respaldo-${this.todayISO()}.json`; document.body.appendChild(a); a.click(); a.remove();
-            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
         },
 
         /* ---------- UI general ---------- */
@@ -1093,6 +1181,10 @@
             setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, type === 'error' ? 5000 : 3000);
         },
         switchTab(tabId) {
+            if (tabId !== 'config' && !localStorage.getItem(this.KEY_URL)) {
+                this.showToast('⚠️ Debes configurar tu URL de nube primero para usar el sistema.', 'error');
+                tabId = 'config';
+            }
             document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.nav-btn').forEach(el => {
                 el.classList.remove('text-white', 'bg-brand-600', 'shadow-sm');
